@@ -37,7 +37,6 @@ int main (int argc, char* argv[]){
 	char cmd [128];
 	bool finish= false;
 	int indice;
-	int msg_id=-1;
 
 	while(finish != true){
 		if(fgets(cmd, 128, stdin) == NULL){
@@ -50,7 +49,7 @@ int main (int argc, char* argv[]){
 				if(strncasecmp(cmd, "USER", 4) == 0){
 					printf("->USER\n");
 					if((indice= supp_space(cmd, 4)) == -1){
-						printf("Invalide argument, please enter a new commande\n");
+						printf("Invalide argument, please enter a new command\n");
 					}
 					else{	
 						user_handler(cmd+indice);
@@ -61,7 +60,7 @@ int main (int argc, char* argv[]){
 				if(strncasecmp(cmd, "PASS", 4) == 0){
 					printf("->PASS\n");
 					if((indice= supp_space(cmd, 4)) == -1){
-						printf("Invalide argument, please enter a new commande\n");
+						printf("Invalide argument, please enter a new command\n");
 					}
 					else{	
 						//traiter commande
@@ -79,16 +78,30 @@ int main (int argc, char* argv[]){
 				if(strncasecmp(cmd, "TOP", 3) == 0){
 					printf("->TOP\n");
 					//top_handler();
+					if((indice= supp_space(cmd, 3)) == -1){
+						printf("Invalide argument, please enter a new command\n");
+					}
+					else{	
+						//traiter commande
+						int msg_id=0;
+						int nb_ligne=0;
+						sscanf(cmd+indice, "%d %d", &msg_id, &nb_ligne);
+						if(nb_ligne != 0){
+							printf("Invalide argument, please enter a new command\n");
+						}
+						top_handler(msg_id, nb_ligne);
+					}
 				}
 				break;
 			case 'R':
 				if(strncasecmp(cmd, "RETR", 4) == 0){
 					printf("->RETR\n");
 					if((indice= supp_space(cmd, 4)) == -1){
-						printf("Invalide argument, please enter a new commande\n");
+						printf("Invalide argument, please enter a new command\n");
 					}
 					else{	
 						//traiter commande
+						int msg_id;
 						msg_id= atoi(cmd+indice); 
 						retr_handler(msg_id);
 					}
