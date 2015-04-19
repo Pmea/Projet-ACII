@@ -1,12 +1,8 @@
 CC= gcc
 CFLAGS= -Wall -Werror -g -lm
 
-all: main-pop 
-#t-test c-test g-test
-
-#General 
-
-main-pop: main-pop.o textuel-pop.o clicable-pop.o graphique-pop.o
+#Excercice 1
+t-test: main-pop.o textuel-pop.o
 	$(CC) -o $@ $^ $(CFLAGS) 
 
 main-pop.o: main-pop.c 
@@ -15,15 +11,25 @@ main-pop.o: main-pop.c
 textuel-pop.o: textuel-pop.c textuel-pop.h
 		$(CC) -o $@ -c $< $(CFLAGS)	
 
-
-#Excercice 1
-#t-test: 
-
 #Excercice 2
-#c-test: 
+c-test: main-pop.o clicable-pop.o
+	$(CC) -o $@ $^ $(CFLAGS) 
+
+main-pop.o: main-pop.c 
+	$(CC) -o $@ -c $< $(CFLAGS)		
+
+clicable-pop.o: clicable-pop.c clicable-pop.h
+		$(CC) -o $@ -c $< $(CFLAGS)	
 
 #Excercice 3
-#g-test:
+g-test: main-pop.o graphique-pop.o
+	$(CC) -o $@ $^ $(CFLAGS) 
+
+main-pop.o: main-pop.c 
+	$(CC) -o $@ -c $< $(CFLAGS)		
+
+graphique-pop.o: graphique-pop.c graphique-pop.h
+		$(CC) -o $@ -c $< $(CFLAGS)	
 
 clean:
-	rm main-pop *.o *
+	rm main-pop *.o 
