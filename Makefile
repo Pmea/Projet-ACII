@@ -1,5 +1,5 @@
 CC= gcc
-CFLAGS= -Wall -Werror
+CFLAGS= -Wall -Werror -g -lm
 
 all: main-pop 
 #t-test c-test g-test
@@ -7,7 +7,7 @@ all: main-pop
 #General 
 
 main-pop: main-pop.o textuel-pop.o clicable-pop.o graphique-pop.o
-	$(CC) -o $@ $^ $(CFLAGS)
+	$(CC) -o $@ $^ $(CFLAGS) 
 
 main-pop.o: main-pop.c 
 	$(CC) -o $@ -c $< $(CFLAGS)		
@@ -26,4 +26,4 @@ textuel-pop.o: textuel-pop.c textuel-pop.h
 #g-test:
 
 clean:
-	rm main-pop *.o *~
+	rm main-pop *.o *

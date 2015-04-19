@@ -167,7 +167,6 @@ void top_handler(int id_msg, int nb_ligne){
 	char buff_req[64];
 	sprintf(buff_req, "TOP %d %d\r\n", id_msg, nb_ligne);
 
-	printf("%s\n", buff_req);
 	if(fwrite(buff_req, strlen(buff_req), sizeof(char), fsock) == -1){
 		perror("Error write in socket");
 		exit(EXIT_FAILURE);	
@@ -175,26 +174,11 @@ void top_handler(int id_msg, int nb_ligne){
 
 	char buff_ans[128];
 	//recuperation reponse
-	bool err= false;
-	while(strcmp(fgets(buff_ans, 128, fsock), "\r\n") != 0){
+	while(strcmp(fgets(buff_ans, 128, fsock), ".\r\n") != 0){
 		printf("%s", buff_ans);
 		if(strncmp(buff_ans, "-ERR", 4) == 0){
-			err=true;
-			break;
-		}
-	}
-
-	if(err== true)
-		return;
-
-	int i;
-	for(i=0; i<nb_ligne; i++){
-		printf("%s", buff_ans);
-		if(strcmp(fgets(buff_ans, 128, fsock), ".\r\n") != 0){			//si on est a la fin du message
-			printf("%s", buff_ans);
 			return;
 		}
 	}
 	printf("%s", buff_ans);
-
 }

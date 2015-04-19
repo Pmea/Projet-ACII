@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-
+#include <math.h>
 
 #include "textuel-pop.h"
 
@@ -83,13 +83,12 @@ int main (int argc, char* argv[]){
 					}
 					else{	
 						//traiter commande
-						int msg_id=0;
-						int nb_ligne=0;
-						sscanf(cmd+indice, "%d %d", &msg_id, &nb_ligne);
-						if(nb_ligne != 0){
-							printf("Invalide argument, please enter a new command\n");
-						}
+						int msg_id=atoi(cmd+indice);
+						indice= supp_space(cmd, 3 + indice + (int) log10(msg_id));
+						int nb_ligne=atoi(cmd+indice);
+					
 						top_handler(msg_id, nb_ligne);
+						
 					}
 				}
 				break;
