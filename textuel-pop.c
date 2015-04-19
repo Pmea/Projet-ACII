@@ -109,7 +109,6 @@ void pass_handler(char* arg){
 		perror("Error write in socket");
 		exit(EXIT_FAILURE);	
 	}
-	fflush(fsock);
 
 	if(fwrite(arg, strlen(arg), sizeof(char), fsock) == -1){
 		perror("Error write in socket");
@@ -126,3 +125,17 @@ void pass_handler(char* arg){
 	printf("%s",buff_ans);	
 }
 
+void list_handler(void){
+	//envoi requet
+	if(fwrite("LIST\r\n", strlen("LIST \r\n"), sizeof(char), fsock) == -1){
+		perror("Error write in socket");
+		exit(EXIT_FAILURE);	
+	}
+
+	char buff_ans[128];
+	//recuperation reponse
+	while(strcmp(fgets(buff_ans, 128, fsock), ".")!=0){
+		printf("%s",buff_ans);
+	}
+
+}

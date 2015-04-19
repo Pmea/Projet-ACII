@@ -64,15 +64,14 @@ int main (int argc, char* argv[]){
 					}
 					else{	
 						//traiter commande
-						printf("%s\n", cmd+indice);
-						//pass_handler(cmd+indice);
+						pass_handler(cmd+indice);
 					}
 				}
 				break;
 			case 'L':
 				if(strncasecmp(cmd, "LIST", 4) == 0){
 					printf("->LIST\n");
-					//list_handler();
+					list_handler();						
 				}
 				break;
 			case 'T':

@@ -9,4 +9,6 @@ bool close_connexion(void);
 void user_handler(char* arg);
 void pass_handler(char* arg);
 
+void list_handler(void);
+
 #endif /*TEXTUELPOP_H*/
