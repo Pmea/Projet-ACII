@@ -7,6 +7,6 @@ bool init_connexion(char* serveur, int port);
 bool close_connexion(void);
 
 void user_handler(char* arg);
-
+void pass_handler(char* arg);
 
 #endif /*TEXTUELPOP_H*/

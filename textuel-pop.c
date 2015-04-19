@@ -100,3 +100,29 @@ void user_handler(char* arg){
 
 	printf("%s",buff_ans);
 }
+
+
+
+void pass_handler(char* arg){
+	//envoier requet
+	if(fwrite("PASS ", strlen("PASS "), sizeof(char), fsock) == -1){
+		perror("Error write in socket");
+		exit(EXIT_FAILURE);	
+	}
+	fflush(fsock);
+
+	if(fwrite(arg, strlen(arg), sizeof(char), fsock) == -1){
+		perror("Error write in socket");
+		exit(EXIT_FAILURE);	
+	}
+
+	char buff_ans[128];
+	//recuperation reponse
+	if(fgets(buff_ans, 128, fsock)== NULL){
+		printf("Error Server answer");
+		exit(EXIT_FAILURE);
+	}
+
+	printf("%s",buff_ans);	
+}
+
