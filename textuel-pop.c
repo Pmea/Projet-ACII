@@ -127,15 +127,37 @@ void pass_handler(char* arg){
 
 void list_handler(void){
 	//envoi requet
-	if(fwrite("LIST\r\n", strlen("LIST \r\n"), sizeof(char), fsock) == -1){
+	if(fwrite("LIST\r\n", strlen("LIST\r\n"), sizeof(char), fsock) == -1){
 		perror("Error write in socket");
 		exit(EXIT_FAILURE);	
 	}
 
 	char buff_ans[128];
 	//recuperation reponse
-	while(strcmp(fgets(buff_ans, 128, fsock), ".")!=0){
+	while(strcmp(fgets(buff_ans, 128, fsock), ".\r\n") !=0){
 		printf("%s",buff_ans);
 	}
+	printf("%s", buff_ans);
+
+}
+
+
+void retr_handler(int id_msg){
+	char buff_req[64];
+	sprintf(buff_req, "RETR %d\r\n", id_msg);
+
+	if(fwrite(buff_req, strlen(buff_req), sizeof(char), fsock) == -1){
+		perror("Error write in socket");
+		exit(EXIT_FAILURE);	
+	}
+
+	char buff_ans[128];
+	//recuperation reponse
+	while(strcmp(fgets(buff_ans, 128, fsock), ".\r\n")!=0){
+		if(strncmp(buff_ans, "-ERR", 4) == 0)
+			break;
+		printf("%s",buff_ans);
+	}
+		printf("%s", buff_ans);
 
 }

@@ -11,4 +11,6 @@ void pass_handler(char* arg);
 
 void list_handler(void);
 
+void retr_handler(int id_msg);
+
 #endif /*TEXTUELPOP_H*/

@@ -37,6 +37,7 @@ int main (int argc, char* argv[]){
 	char cmd [128];
 	bool finish= false;
 	int indice;
+	int msg_id=-1;
 
 	while(finish != true){
 		if(fgets(cmd, 128, stdin) == NULL){
@@ -71,8 +72,8 @@ int main (int argc, char* argv[]){
 			case 'L':
 				if(strncasecmp(cmd, "LIST", 4) == 0){
 					printf("->LIST\n");
-					list_handler();						
-				}
+					list_handler();		
+				}				
 				break;
 			case 'T':
 				if(strncasecmp(cmd, "TOP", 3) == 0){
@@ -83,7 +84,14 @@ int main (int argc, char* argv[]){
 			case 'R':
 				if(strncasecmp(cmd, "RETR", 4) == 0){
 					printf("->RETR\n");
-					//retr_handler();
+					if((indice= supp_space(cmd, 4)) == -1){
+						printf("Invalide argument, please enter a new commande\n");
+					}
+					else{	
+						//traiter commande
+						msg_id= atoi(cmd+indice); 
+						retr_handler(msg_id);
+					}
 				}
 				break;
 			case 'Q':
