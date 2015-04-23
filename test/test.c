@@ -81,16 +81,15 @@ int main(int argc, char *argv[]){
 	while(fgets(buff, SIZE_BUFF, mime_types) > 0){
 		int match= regexec(&r, buff, n_matches, m, 0);
 		if(match == 0){
-			printf("BUFF-> %s", buff);
 			memcpy(buff_type, buff + (int) m[1].rm_so, m[1].rm_eo - m[1].rm_so );
 			buff_type[m[1].rm_eo - m[1].rm_so ] = '\0'; 
-			printf("%s\n", buff_type);
+			printf("%s:", buff_type);
 
 			memcpy(buff_ext, buff + (int) m[2].rm_so, m[2].rm_eo - m[2].rm_so );
 			buff_ext[m[2].rm_eo - m[2].rm_so] = '\0';
 			printf("%s\n",buff_ext);
-	}
-
+		}
+		
 	}
 
 	free(buff_ext);
