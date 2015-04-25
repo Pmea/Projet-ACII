@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <math.h>
 
+#include "liste_mime.h"
 #include "textuel-pop.h"
 
 
@@ -25,6 +26,10 @@ int main (int argc, char* argv[]){
 		return EXIT_FAILURE;
 	}
 
+	if(construire_liste_mime() == false){
+		printf("Error creation of mime_type liste\n");
+		exit(EXIT_FAILURE);
+	}
 
 	printf("Trying %s...\n", argv[1]);
 	if(init_connexion(argv[1], atoi(argv[2])) == false){
@@ -119,6 +124,11 @@ int main (int argc, char* argv[]){
 
 	if(close_connexion() == false){
 		printf("Error close connexion\n");
+		exit(EXIT_FAILURE);
+	}
+
+	if(detruire_liste_mime() == false){
+		printf("Error liste_mime destruction \n");
 		exit(EXIT_FAILURE);
 	}
 	
