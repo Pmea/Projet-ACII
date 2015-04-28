@@ -12,7 +12,22 @@
 #define WIDTH_MAIN WIDTH_LOG*2 + MARGIN * 3 + BORDER * 4 
 #define HEIGHT_MAIN 300
 
-#define MAX_LENGTH 256
+#define MAX_LENGTH 56
+
+Display * dpy;
+Window main_fen;
+
+Window log_user_fen;
+Window log_pass_fen;
+
+Window quit_button;
+Window connect_button;
+
+XColor color_fond;
+
+GC gc_glob;
+
+Cursor fleche;
 
 Window focus_fen;
 bool focus_init= false;
@@ -48,7 +63,7 @@ bool init_main_win(){
  	XSetForeground(dpy,gc_glob,BlackPixel(dpy,DefaultScreen(dpy)));
  	XSetBackground(dpy,gc_glob,WhitePixel(dpy,DefaultScreen(dpy))); 
 
-	XSelectInput(dpy, main_fen, KeyPressMask );
+	XSelectInput(dpy, main_fen, KeyPressMask |  ExposureMask);
 
   	XMapWindow(dpy, main_fen);
 	XFlush(dpy);
@@ -71,12 +86,13 @@ bool init_log_win(){
 					       BlackPixel(dpy,DefaultScreen(dpy)),
 					       color_fond.pixel);
 
+
 	fleche= XCreateFontCursor(dpy, CODE_CURS_XC_xterm);
 	XDefineCursor(dpy, log_user_fen, fleche);
 	XDefineCursor(dpy, log_pass_fen, fleche);
 	
-	XSelectInput(dpy, log_user_fen, KeyPressMask | ButtonPressMask);
-	XSelectInput(dpy, log_pass_fen, KeyPressMask | ButtonPressMask);
+	XSelectInput(dpy, log_user_fen, KeyPressMask | ButtonPressMask |  ExposureMask);
+	XSelectInput(dpy, log_pass_fen, KeyPressMask | ButtonPressMask |  ExposureMask);
 
 	XMapWindow(dpy, log_pass_fen);		
 	XMapWindow(dpy, log_user_fen);
@@ -107,13 +123,15 @@ bool detruire_pop_win(){
 
 
 void expose(void){
-	XDrawString(dpy, log_user_fen, gc_glob, MARGIN*2, MARGIN*2, user_text, strlen(user_text));
-	XDrawString(dpy, log_pass_fen, gc_glob, MARGIN*2, MARGIN*2, pass_text, strlen(pass_text));
+	XDrawString(dpy, log_user_fen, gc_glob, MARGIN, MARGIN*3/2, user_text, strlen(user_text));
+	XDrawString(dpy, log_pass_fen, gc_glob, MARGIN, MARGIN*3/2, pass_text, strlen(pass_text));
 }
 
 void traiter_ExposeEvent(XExposeEvent xee){
-	printf("Expose Event\n");
+	printf("Expose Event: %d\n", xee.count);
+
 	if(xee.count == 0){
+		printf("Last Expose Event\n");
 		expose();
 	}
 }
@@ -164,13 +182,13 @@ void traiter_KeyPressEvent(XKeyEvent xke){
 		XClearWindow(dpy, focus_fen);
 			if(strlen(user_text) > 0){
 				user_text[strlen(user_text) -1]= '\0';
-				XDrawString(dpy, log_user_fen, gc_glob, MARGIN*2, MARGIN*2, user_text, strlen(user_text));
+				XDrawString(dpy, log_user_fen, gc_glob, MARGIN, MARGIN*3/2, user_text, strlen(user_text));
 			}
 		
 			if(focus_fen == log_pass_fen){
 			if(strlen(pass_text) > 0){
 				pass_text[strlen(pass_text) -1]= '\0';
-				XDrawString(dpy, log_pass_fen, gc_glob, MARGIN*2, MARGIN*2, pass_text, strlen(pass_text));
+				XDrawString(dpy, log_pass_fen, gc_glob, MARGIN, MARGIN*3/2, pass_text, strlen(pass_text));
 			}
 		}
 	}
@@ -190,12 +208,16 @@ void traiter_KeyPressEvent(XKeyEvent xke){
 
 	if(est_caractere_valide(key, sym)){
 		if(focus_fen == log_user_fen){
-			sprintf(user_text, "%s%s", user_text, key);
-			XDrawString(dpy, log_user_fen, gc_glob, MARGIN*2, MARGIN*2, user_text, strlen(user_text));
+			if( strlen(user_text) < MAX_LENGTH){
+				sprintf(user_text, "%s%s", user_text, key);
+				XDrawString(dpy, log_user_fen, gc_glob, MARGIN, MARGIN*3/2, user_text, strlen(user_text));
+			}
 		}
 		if(focus_fen == log_pass_fen){
-			sprintf(pass_text, "%s%s", pass_text, key);
-			XDrawString(dpy, log_pass_fen, gc_glob, MARGIN*2, MARGIN*2, pass_text, strlen(pass_text));		
+			if( strlen(pass_text) < MAX_LENGTH){
+				sprintf(pass_text, "%s%s", pass_text, key);
+				XDrawString(dpy, log_pass_fen, gc_glob, MARGIN, MARGIN*3/2, pass_text, strlen(pass_text));		
+			}
 		}
 	}
 	else{
