@@ -2,7 +2,7 @@
 
 
 #define CODE_CURS_XC_xterm 152
-#define CODE_CRUS_XC_draft_large 44
+#define CODE_CURS_XC_draft_large 44
 
 #define MARGIN 10
 #define BORDER 2

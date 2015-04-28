@@ -85,17 +85,17 @@ bool close_connexion(void){
 }
 
 
-void user_handler(char* arg){
+bool user_handler(char* arg){
 	//envoier requet
 	if(fwrite("USER ", strlen("USER "), sizeof(char), fsock) == -1){
 		perror("Error write in socket");
-		exit(EXIT_FAILURE);	
+		exit(EXIT_FAILURE);
 	}
 	fflush(fsock);
 
 	if(fwrite(arg, strlen(arg), sizeof(char), fsock) == -1){
 		perror("Error write in socket");
-		exit(EXIT_FAILURE);	
+		exit(EXIT_FAILURE);
 	}
 
 	char buff_ans[128];
@@ -106,11 +106,15 @@ void user_handler(char* arg){
 	}
 
 	printf("%s",buff_ans);
+
+	if(strncmp(buff_ans, "-ERR", 4) == 0)
+		return false;
+	return true;
 }
 
 
 
-void pass_handler(char* arg){
+bool pass_handler(char* arg){
 	//envoier requet
 	if(fwrite("PASS ", strlen("PASS "), sizeof(char), fsock) == -1){
 		perror("Error write in socket");
@@ -129,10 +133,13 @@ void pass_handler(char* arg){
 		exit(EXIT_FAILURE);
 	}
 
-	printf("%s",buff_ans);	
+	printf("%s",buff_ans);
+	if(strncmp(buff_ans, "-ERR", 4) == 0)
+		return false;
+	return true;
 }
 
-void list_handler(void){
+bool list_handler(void){
 	//envoi requet
 	if(fwrite("LIST\r\n", strlen("LIST\r\n"), sizeof(char), fsock) == -1){
 		perror("Error write in socket");
@@ -146,7 +153,9 @@ void list_handler(void){
 	}
 	printf("%s", buff_ans);
 
-}
+	if(strncmp(buff_ans, "-ERR", 4) == 0)
+		return false;
+	return true;}
 
 
 
@@ -291,7 +300,7 @@ void retr_handler(int id_msg){
 }
 
 
-void top_handler(int id_msg, int nb_ligne){
+bool top_handler(int id_msg, int nb_ligne){
 	char buff_req[64];
 	sprintf(buff_req, "TOP %d %d\r\n", id_msg, nb_ligne);
 
@@ -305,8 +314,9 @@ void top_handler(int id_msg, int nb_ligne){
 	while(strcmp(fgets(buff_ans, 128, fsock), ".\r\n") != 0){
 		printf("%s", buff_ans);
 		if(strncmp(buff_ans, "-ERR", 4) == 0){
-			return;
+			return false;
 		}
 	}
 	printf("%s", buff_ans);
+	return true;
 }

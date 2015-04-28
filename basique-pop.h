@@ -11,7 +11,7 @@ bool pass_handler(char* arg);
 
 bool list_handler(void);
 
-bool retr_handler(int id_msg);
+void retr_handler(int id_msg);
 bool top_handler(int id_msg, int nb_ligne);
 
 
