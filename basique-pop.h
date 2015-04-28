@@ -6,13 +6,13 @@
 bool init_connexion(char* serveur, int port);
 bool close_connexion(void);
 
-void user_handler(char* arg);
-void pass_handler(char* arg);
+bool user_handler(char* arg);
+bool pass_handler(char* arg);
 
-void list_handler(void);
+bool list_handler(void);
 
-void retr_handler(int id_msg);
-void top_handler(int id_msg, int nb_ligne);
+bool retr_handler(int id_msg);
+bool top_handler(int id_msg, int nb_ligne);
 
 
 #endif /*TEXTUELPOP_H*/
