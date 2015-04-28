@@ -193,7 +193,6 @@ bool annalyser_Entete(regex_t r, char* ext, char* boundary){
 					strcpy(ext, tmp);
 					printf("TYPE: %s EXT:%s\n",  type, ext);
 					free(type);
-					free(tmp);
 				}
 			}
 		}
@@ -305,7 +304,8 @@ void retr_handler(int id_msg){
 
 
 bool top_handler(int id_msg, int nb_ligne, char * sortie){
-	sortie[0]='\0';
+	if(sortie != NULL)
+		sortie[0]='\0';
 
 	char buff_req[64];
 	sprintf(buff_req, "TOP %d %d\r\n", id_msg, nb_ligne);

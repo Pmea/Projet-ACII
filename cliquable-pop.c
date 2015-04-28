@@ -370,9 +370,10 @@ void traiter_ButtonPress_sur_mail(XButtonEvent xbe){
 
 	int i;
 	for(i=0; i<nb_mails; i++){
-		if(mails_fen[i] ==  xbe.window){
+		if(mails_fen[i] ==  xbe.window && recup_mail[i] == false){
 			//recuperer email
 			recup_mail[i]=true;
+			retr_handler(i+1);
 		}
 	}
 	expose_mail();

@@ -63,7 +63,9 @@ void preparer_pour_affichage(int nb_du_msg, char* top){
 	}
 
 	sprintf(top, "%d From: %s Date: %s", nb_du_msg, buff_form, buff_date);
+	printf("FREE FORM\n");
 	free(buff_form);
+	printf("FREE DATE\n");
 	free(buff_date);
 }
 
@@ -127,8 +129,10 @@ int main_cliquable(int argc, char* argv[]){
 		init_pop_win(nb_msg, top_tab);
 
 		for(i=0; i<nb_msg; i++){
+			printf("FREE TOP[i]\n");
 			free(top_tab[i]);
 		}
+		printf("FREE TOPTOTAL\n");
 		free(top_tab);
 
 		XEvent event_mails;
