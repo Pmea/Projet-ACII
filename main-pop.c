@@ -23,6 +23,54 @@ int supp_space(const char* str, int start){
 	return ind;
 }
 
+const char * reg_From= "[fF]rom:[[:space:]]+([a-zA-Z0-9~+@._-]+)";
+const char * reg_Date= "[dD]ate:[[:space:]]+([a-zA-Z0-9,:+[:space:]]+)";
+
+void preparer_pour_affichage(int nb_du_msg, char* top){
+
+	regex_t r_from;
+	int status= regcomp(&r_from, reg_From, REG_EXTENDED );
+	if(status != 0){
+		printf("Error: regcomp regex\n");
+		exit(EXIT_FAILURE);
+	}
+	regex_t r_date;
+	status= regcomp(&r_date, reg_Date, REG_EXTENDED);
+	if(status != 0){
+		printf("Error: regcomp regex\n");
+		exit(EXIT_FAILURE);
+	}
+
+	char* buff_form= (char*) malloc(sizeof(char) * 1024);
+	char* buff_date= (char*) malloc(sizeof(char) * 1024);;
+
+	printf("||%s\n||", top);
+
+	const int n_matches= 2;
+	regmatch_t m[n_matches];
+	int match= regexec(&r_from, top, n_matches, m, 0);
+	if(match != REG_NOMATCH){
+		printf("MATCH\n");
+		buff_form=strndup(top + (int) m[1].rm_so, m[1].rm_eo - m[1].rm_so );
+	}
+	else{
+		sprintf(buff_form, "xxxxxxxxxxx@xxxxxx.xxx");
+	}
+
+	match= regexec(&r_date, top, n_matches, m, 0);
+	if(match != REG_NOMATCH){
+		buff_date=strndup(top + (int) m[1].rm_so, m[1].rm_eo - m[1].rm_so );
+	}
+	else{
+		sprintf(buff_date, "jour, xx mois annee hh:mm:ss");
+	}
+
+	sprintf(top, "%d From: %s Date: %s", nb_du_msg, buff_form, buff_date);
+	printf("%s\n", top);
+	free(buff_form);
+	free(buff_date);
+}
+
 char option(int argc, char* argv[]){
 	char choix= 0;
 	int i;
@@ -70,10 +118,26 @@ int main_cliquable(int argc, char* argv[]){
 
 	detruire_log_win();
 	int nb_msg= list_handler();
-	init_pop_win(nb_msg);
-	while(quit_cliquable == false){
 
-		XNextEvent(dpy, &event);
+	char ** top_tab= (char**) malloc(sizeof(char*) * nb_msg);
+	int i;
+	for(i= 1; i<=nb_msg; i++){
+		top_tab[i-1]= (char*) malloc(sizeof(char) * 1024);
+		top_handler(i, 0, top_tab[i-1]);
+		preparer_pour_affichage(i, top_tab[i-1]);
+	}
+
+	init_pop_win(nb_msg, top_tab);
+
+	for(i=0; i<nb_msg; i++){
+		free(top_tab[i]);
+	}
+	free(top_tab);
+
+	XEvent event_mails;
+	while(quit_cliquable == false){
+		traiter_event_mails(event_mails);
+		XNextEvent(dpy, &event_mails);
 	}
 	detruire_pop_win();
 	detruire_main_win();
@@ -152,7 +216,7 @@ int main_textuel(int argc, char* argv[]){
 						indice= supp_space(cmd, 3 + indice + (int) log10(msg_id));
 						int nb_ligne=atoi(cmd+indice);
 					
-						top_handler(msg_id, nb_ligne);
+						top_handler(msg_id, nb_ligne, NULL);
 						
 					}
 				}

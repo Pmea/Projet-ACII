@@ -159,7 +159,7 @@ bool init_pop_win(int nb_mail, char ** top_mails){
 					       color_fond.pixel);
 		XSelectInput(dpy, mails_fen[i],  ButtonPressMask | ExposureMask);
 		XMapWindow(dpy, mails_fen[i]);
-		XDrawString(dpy, mails_fen[i], gc_glob, MARGIN/2, MARGIN*3/2, "BONJOUR", strlen("BONJOUR"));
+		XDrawString(dpy, mails_fen[i], gc_glob, MARGIN/2, MARGIN*3/2, top_mails[i], strlen(top_mails[i]));
 	}
 	
 	return true;
@@ -335,6 +335,7 @@ void traiter_event(XEvent e){
 }
 
 
+
 void traiter_event_mails(XEvent e){
 	if(e.type == Expose){
 		printf("Expose Event\n");
@@ -342,10 +343,6 @@ void traiter_event_mails(XEvent e){
 	}
 	if(e.type == ButtonPress){
 		printf("Button Press\n");
-		return;
-	}
-	if(e.type == KeyPress){
-		printf("KeyPress\n");
 		return;
 	}
 	printf("PAS RECONNU EVENT \n");
