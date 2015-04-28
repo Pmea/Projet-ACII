@@ -141,23 +141,26 @@ bool pass_handler(char* arg){
 	return true;
 }
 
-bool list_handler(void){
+int list_handler(void){
 	//envoi requet
 	if(fwrite("LIST\r\n", strlen("LIST\r\n"), sizeof(char), fsock) == -1){
 		perror("Error write in socket");
 		exit(EXIT_FAILURE);	
 	}
 
+	int compt_msg=0;
 	char buff_ans[128];
 	//recuperation reponse
 	while(strcmp(fgets(buff_ans, 128, fsock), ".\r\n") !=0){
 		printf("%s",buff_ans);
+		compt_msg++;
 	}
 	printf("%s", buff_ans);
 
 	if(strncmp(buff_ans, "-ERR", 4) == 0)
-		return false;
-	return true;}
+		return -1;
+	return compt_msg;
+}
 
 
 

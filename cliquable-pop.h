@@ -37,7 +37,7 @@ char msg_erreur[MAX_LENGTH];
 
 bool init_main_win(void);
 bool init_log_win(void);
-bool init_pop_win(void);
+bool init_pop_win(int nb_mail);
 
 bool detruire_main_win(void);
 bool detruire_log_win(void);

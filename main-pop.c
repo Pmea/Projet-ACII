@@ -68,13 +68,14 @@ int main_cliquable(int argc, char* argv[]){
 		XNextEvent(dpy, &event);
 	}
 
-
 	detruire_log_win();
-
+	int nb_msg= list_handler();
+	init_pop_win(nb_msg);
 	while(quit_cliquable == false){
+
 		XNextEvent(dpy, &event);
 	}
-
+	detruire_pop_win();
 	detruire_main_win();
 
 	if(close_connexion() == false){

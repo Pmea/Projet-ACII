@@ -1,5 +1,6 @@
 #include "cliquable-pop.h"
 
+#define N 10
 
 #define CODE_CURS_XC_xterm 152
 #define CODE_CURS_XC_draft_large 60
@@ -13,8 +14,11 @@
 #define WIDTH_BUTTON 75
 #define HEIGHT_BUTTON 20
 
+#define WIDTH_MAIL WIDTH_LOG*2 + MARGIN + BORDER *2
+#define HEIGHT_MAIL 300 
+
 #define WIDTH_MAIN WIDTH_LOG*2 + MARGIN * 3 + BORDER * 4 
-#define HEIGHT_MAIN 300
+#define HEIGHT_MAIN 400
 
 
 
@@ -26,9 +30,15 @@ Window log_pass_fen;
 Window quit_button;
 Window connect_button;
 
+Window pop_fen;
+Window mails_fen[N];
+
 XFontStruct *font;
 
 XColor color_fond;
+XColor color_focus;
+XColor color_plus_cliquable;
+
 
 GC gc_glob;
 
@@ -36,7 +46,6 @@ Cursor fleche, clic;
 
 Window focus_fen;
 bool focus_init= false;
-XColor color_focus;
 
 
 bool init_main_win(){
@@ -49,6 +58,8 @@ bool init_main_win(){
 
 	XAllocNamedColor(dpy, DefaultColormap(dpy, DefaultScreen(dpy)), "grey", &color_fond, &color_fond);
 	XAllocNamedColor(dpy, DefaultColormap(dpy, DefaultScreen(dpy)), "DimGrey", &color_focus, &color_focus);
+	XAllocNamedColor(dpy, DefaultColormap(dpy, DefaultScreen(dpy)), "LightGrey", &color_plus_cliquable , &color_plus_cliquable );
+
 
   	main_fen = XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0,
 					       WIDTH_MAIN,
@@ -78,7 +89,7 @@ bool init_main_win(){
 	XDefineCursor(dpy, quit_button, clic);
 
 	XSelectInput(dpy, main_fen, KeyPressMask | ExposureMask);
-	XSelectInput(dpy, quit_button,  ButtonPressMask | KeyPressMask | ExposureMask);
+	XSelectInput(dpy, quit_button,  ButtonPressMask | ExposureMask);
 
 	XMapWindow(dpy, main_fen);
   	XMapSubwindows(dpy, main_fen);
@@ -128,13 +139,36 @@ bool init_log_win(){
 	return true;
 }
 
-bool init_pop_win(){
+bool init_pop_win(int nb_mail){
+
+	pop_fen= XCreateSimpleWindow(dpy, main_fen, MARGIN, MARGIN*6,
+					       WIDTH_MAIL,
+					       HEIGHT_MAIL,
+					       BORDER, 
+					       BlackPixel(dpy,DefaultScreen(dpy)),
+					       color_fond.pixel);
+
+	int i;
+	for(i=0; i<nb_mail; i++){
+		mails_fen[i]=  XCreateSimpleWindow(dpy, pop_fen, MARGIN, MARGIN*6 + HEIGHT_LOG * i,
+					       WIDTH_MAIL,
+					       HEIGHT_MAIL,
+					       BORDER, 
+					       BlackPixel(dpy,DefaultScreen(dpy)),
+					       color_fond.pixel);
+	}
+	
+	XSelectInput(dpy, pop_fen,  ButtonPressMask | ExposureMask);
+	XMapWindow(dpy, pop_fen);	
+	XMapSubwindows(dpy, pop_fen);			
 	return true;
 }
 
 bool detruire_main_win(){
 	XDestroySubwindows(dpy, main_fen);
 	//XFreeColors(dpy, DefaultScreen(dpy), color_fond.pixel, 1);
+	//XFreeColors(dpy, DefaultScreen(dpy), color_focus.pixel, 1);
+	//XFreeColors(dpy, DefaultScreen(dpy), color_plus_cliquable.pixel, 1);
 	XFreeGC(dpy, gc_glob);
 	XFreeFont(dpy, font);
 	XCloseDisplay(dpy);
