@@ -59,9 +59,9 @@ int main_cliquable(int argc, char* argv[]){
 			sprintf(user_text, "%s\n", user_text);
 			sprintf(pass_text, "%s\n", pass_text);
 			printf("USER %s\nPASS %s\n", user_text, pass_text);
-			
 			if( !user_handler(user_text) || !pass_handler(pass_text)){
 				initialiser_champs();
+				afficher_msg("Identifiant non valide");
 				quit_log= false;
 			}
 		}

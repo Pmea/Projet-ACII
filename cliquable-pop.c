@@ -39,8 +39,9 @@ bool focus_init= false;
 XColor color_focus;
 
 
-
 bool init_main_win(){
+	msg_erreur[0]='\0';
+
 	if ((dpy = XOpenDisplay(NULL)) == NULL){
   		printf("Erro open display");
   		exit(EXIT_FAILURE);
@@ -86,8 +87,6 @@ bool init_main_win(){
 	return true;
 }
 bool init_log_win(){
-	initialiser_champs();
-
 	log_user_fen=  XCreateSimpleWindow(dpy, main_fen, MARGIN, MARGIN,
 					       WIDTH_LOG,
 					       HEIGHT_LOG,
@@ -118,6 +117,8 @@ bool init_log_win(){
 	XSelectInput(dpy, log_pass_fen, KeyPressMask | ButtonPressMask |  ExposureMask);
 	XSelectInput(dpy, connect_button, ButtonPressMask | KeyPressMask | ExposureMask);
 
+
+	initialiser_champs();
 
 	XMapWindow(dpy, log_pass_fen);		
 	XMapWindow(dpy, log_user_fen);
@@ -156,7 +157,7 @@ void expose(void){
 	XDrawString(dpy, log_pass_fen, gc_glob, MARGIN/2, MARGIN*3/2, pass_text, strlen(pass_text));
 	XDrawString(dpy, quit_button, gc_glob, MARGIN/2, MARGIN*3/2, "Quit", strlen("Quit"));
 	XDrawString(dpy, connect_button, gc_glob, MARGIN/2, MARGIN*3/2, "Connection", strlen("Connection"));
-
+	XDrawString(dpy, main_fen, gc_glob, MARGIN*2, MARGIN*5, msg_erreur, strlen(msg_erreur));
 }
 
 void traiter_ExposeEvent(XExposeEvent xee){
@@ -172,7 +173,9 @@ void change_focus_attibute(Window focus_fen){
 	XSetWindowBackground(dpy, log_user_fen, color_fond.pixel);
 	XSetWindowBackground(dpy, log_pass_fen, color_fond.pixel);
 
-	XSetWindowBackground(dpy, focus_fen, color_focus.pixel);
+	if(focus_fen != main_fen){
+		XSetWindowBackground(dpy, focus_fen, color_focus.pixel);
+	}
 	XUnmapWindow(dpy, log_pass_fen);
 	XMapWindow(dpy, log_pass_fen);
 
@@ -180,7 +183,7 @@ void change_focus_attibute(Window focus_fen){
 	XMapWindow(dpy, log_user_fen);
 
 	expose();
-	XFlush(dpy);
+	//XFlush(dpy);
 }
 
 void traiter_ButtonPressEvent(XButtonEvent xbp){
@@ -189,13 +192,20 @@ void traiter_ButtonPressEvent(XButtonEvent xbp){
 	change_focus_attibute(focus_fen);
 	focus_init=true;
 
+	if(strlen(msg_erreur) != 0){
+		printf("MSG erreur %s\n", msg_erreur);
+		XClearWindow(dpy, main_fen);
+		msg_erreur[0]='\0';
+	}
+
 	if(focus_fen == quit_button){
 		printf("Quit\n");
 		quit_cliquable=true;
 	}
 	if(focus_fen == connect_button){
 		printf("CONNECTION\n");
-		quit_log=true;
+		if( strcmp(user_text, "")!=0 && strcmp(pass_text, "") != 0)
+			quit_log=true;
 	}
 	printf("CHANGEMENT DE FOCUS\n");
 }
@@ -280,7 +290,6 @@ void traiter_event(XEvent e){
 		traiter_KeyPressEvent(e.xkey);
 		return;
 	}
-	
 	printf("PAS RECONNU EVENT \n");
 }
 
@@ -288,4 +297,12 @@ void traiter_event(XEvent e){
 void initialiser_champs(){
 	user_text[0]='\0';
 	pass_text[0]='\0';
+	change_focus_attibute(main_fen);
+}
+
+
+void afficher_msg(char* msg){
+	strncpy(msg_erreur, msg, MAX_LENGTH);
+	printf("msg %s\n", msg_erreur);
+	change_focus_attibute(main_fen);
 }

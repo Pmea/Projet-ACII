@@ -32,6 +32,7 @@ Display * dpy;
 
 char user_text[MAX_LENGTH];
 char pass_text[MAX_LENGTH];
+char msg_erreur[MAX_LENGTH];
 
 
 bool init_main_win(void);
@@ -45,5 +46,6 @@ bool detruire_pop_win(void);
 
 void traiter_event(XEvent e);
 void initialiser_champs(void);
+void afficher_msg(char* msg);
 
 #endif /*CLICABLE_POP_H*/
