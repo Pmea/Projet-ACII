@@ -12,8 +12,14 @@
 #define WIDTH_MAIN WIDTH_LOG*2 + MARGIN * 3 + BORDER * 4 
 #define HEIGHT_MAIN 300
 
+#define MAX_LENGTH 256
 
 Window focus_fen;
+bool focus_init= false;
+XColor color_focus;
+
+char user_text[MAX_LENGTH]="";
+char pass_text[MAX_LENGTH]="";
 
 bool init_main_win(){
 	if ((dpy = XOpenDisplay(NULL)) == NULL){
@@ -22,6 +28,7 @@ bool init_main_win(){
   	}
 
 	XAllocNamedColor(dpy, DefaultColormap(dpy, DefaultScreen(dpy)), "grey", &color_fond, &color_fond);
+	XAllocNamedColor(dpy, DefaultColormap(dpy, DefaultScreen(dpy)), "DimGrey", &color_focus, &color_focus);
 
   	main_fen = XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0,
 					       WIDTH_MAIN,
@@ -41,6 +48,7 @@ bool init_main_win(){
  	XSetForeground(dpy,gc_glob,BlackPixel(dpy,DefaultScreen(dpy)));
  	XSetBackground(dpy,gc_glob,WhitePixel(dpy,DefaultScreen(dpy))); 
 
+	XSelectInput(dpy, main_fen, KeyPressMask );
 
   	XMapWindow(dpy, main_fen);
 	XFlush(dpy);
@@ -98,21 +106,105 @@ bool detruire_pop_win(){
 }
 
 
+void expose(void){
+	XDrawString(dpy, log_user_fen, gc_glob, MARGIN*2, MARGIN*2, user_text, strlen(user_text));
+	XDrawString(dpy, log_pass_fen, gc_glob, MARGIN*2, MARGIN*2, pass_text, strlen(pass_text));
+}
+
 void traiter_ExposeEvent(XExposeEvent xee){
 	printf("Expose Event\n");
+	if(xee.count == 0){
+		expose();
+	}
+}
+
+
+void change_focus_attibute(Window focus_fen){
+	XSetWindowBackground(dpy, log_user_fen, color_fond.pixel);
+	XSetWindowBackground(dpy, log_pass_fen, color_fond.pixel);
+
+	XSetWindowBackground(dpy, focus_fen, color_focus.pixel);
+	XUnmapWindow(dpy, log_pass_fen);
+	XMapWindow(dpy, log_pass_fen);
+
+	XUnmapWindow(dpy, log_user_fen);
+	XMapWindow(dpy, log_user_fen);
+
+	expose();
+	XFlush(dpy);
 }
 
 void traiter_ButtonPressEvent(XButtonEvent xbp){
 	printf("ButtonPress Event\n");
+	focus_fen= xbp.window;
+	change_focus_attibute(focus_fen);
+
+	focus_init=true;
+	printf("CHANGEMENT DE FOCUS\n");
+}
+
+
+
+bool est_caractere_valide(char* key, KeySym sym){
+	if(strlen(key) != 1)
+		return false;
+	return (key[0] >= '!' && key[0] <= '~')  || sym == XK_space;
 }
 
 void traiter_KeyPressEvent(XKeyEvent xke){
+	if( focus_init == false)
+		return; 
+
 	printf("KeyPress event\n");
+	char key[16];
+	KeySym sym;
+	XLookupString(&xke, key, 16, &sym, NULL);
+
+	if( sym == XK_BackSpace){
+		XClearWindow(dpy, focus_fen);
+			if(strlen(user_text) > 0){
+				user_text[strlen(user_text) -1]= '\0';
+				XDrawString(dpy, log_user_fen, gc_glob, MARGIN*2, MARGIN*2, user_text, strlen(user_text));
+			}
+		
+			if(focus_fen == log_pass_fen){
+			if(strlen(pass_text) > 0){
+				pass_text[strlen(pass_text) -1]= '\0';
+				XDrawString(dpy, log_pass_fen, gc_glob, MARGIN*2, MARGIN*2, pass_text, strlen(pass_text));
+			}
+		}
+	}
+
+	if( sym == XK_Tab){
+		if(focus_fen == log_user_fen){
+			focus_fen= log_pass_fen;
+			change_focus_attibute(focus_fen);
+		}
+		else{
+			if(focus_fen == log_pass_fen){
+				focus_fen= log_user_fen;
+				change_focus_attibute(focus_fen);		
+			}
+		}
+	}
+
+	if(est_caractere_valide(key, sym)){
+		if(focus_fen == log_user_fen){
+			sprintf(user_text, "%s%s", user_text, key);
+			XDrawString(dpy, log_user_fen, gc_glob, MARGIN*2, MARGIN*2, user_text, strlen(user_text));
+		}
+		if(focus_fen == log_pass_fen){
+			sprintf(pass_text, "%s%s", pass_text, key);
+			XDrawString(dpy, log_pass_fen, gc_glob, MARGIN*2, MARGIN*2, pass_text, strlen(pass_text));		
+		}
+	}
+	else{
+		printf("caractere non valide\n");
+	}
 }
 
 void traiter_event(XEvent e){
-	focus_fen= e.xany.window;
-	
+
 	if(e.type == Expose){
 		traiter_ExposeEvent(e.xexpose);
 		return;
@@ -126,5 +218,5 @@ void traiter_event(XEvent e){
 		return;
 	}
 	printf("PAS RECONNU EVENT \n");
-	
+
 }
