@@ -338,7 +338,6 @@ void traiter_event(XEvent e){
 }
 
 
-
 void expose_mail(void){
 	int i;
 	for(i=0; i<nb_mails; i++){
@@ -347,6 +346,18 @@ void expose_mail(void){
 		XUnmapWindow(dpy, mails_fen[i]);
 		XMapWindow(dpy, mails_fen[i]);
 		XDrawString(dpy, mails_fen[i], gc_glob, MARGIN/2, MARGIN*3/2, mails_text[i], strlen(mails_text[i]));
+	}
+}
+
+void traiter_ExposeEvent_mail(XExposeEvent xee){
+	printf("Expose Event mail: %d\n", xee.count);
+
+	if(xee.count == 0){
+		printf("Last Expose Event\n");
+		int i;
+		for(i=0; i<nb_mails; i++){
+			XDrawString(dpy, mails_fen[i], gc_glob, MARGIN/2, MARGIN*3/2, mails_text[i], strlen(mails_text[i]));
+		}
 	}
 }
 
@@ -369,6 +380,7 @@ void traiter_ButtonPress_sur_mail(XButtonEvent xbe){
 
 void traiter_event_mails(XEvent e){
 	if(e.type == Expose){
+		traiter_ExposeEvent_mail(e.xexpose);
 		return;
 	}
 	if(e.type == ButtonPress){
