@@ -37,7 +37,7 @@ char msg_erreur[MAX_LENGTH];
 
 bool init_main_win(void);
 bool init_log_win(void);
-bool init_pop_win(int nb_mail);
+bool init_pop_win(int nb_mail, char** top_mails);
 
 bool detruire_main_win(void);
 bool detruire_log_win(void);
@@ -45,6 +45,7 @@ bool detruire_pop_win(void);
 
 
 void traiter_event(XEvent e);
+void traiter_event_mails(XEvent e);
 void initialiser_champs(void);
 void afficher_msg(char* msg);
 

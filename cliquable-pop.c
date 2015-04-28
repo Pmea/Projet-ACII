@@ -146,32 +146,28 @@ bool init_pop_win(int nb_mail, char ** top_mails){
 					       HEIGHT_MAIL,
 					       BORDER, 
 					       BlackPixel(dpy,DefaultScreen(dpy)),
-					       color_fond.pixel);
-
+					       color_plus_cliquable.pixel);
+	XSelectInput(dpy, pop_fen,  ButtonPressMask | ExposureMask);
+	XMapWindow(dpy, pop_fen);
 	int i;
-
 	for(i=0; i<nb_mail; i++){
-		mails_fen[i]=  XCreateSimpleWindow(dpy, pop_fen, -  BORDER, -BORDER + HEIGHT_LOG * i,
+		mails_fen[i]=  XCreateSimpleWindow(dpy, pop_fen, -BORDER, -BORDER + HEIGHT_LOG * i,
 					       WIDTH_MAIL,
 					       HEIGHT_MAIL,
 					       BORDER, 
 					       BlackPixel(dpy,DefaultScreen(dpy)),
 					       color_fond.pixel);
 		XSelectInput(dpy, mails_fen[i],  ButtonPressMask | ExposureMask);
-		XDrawString(dpy, mails_fen[i], gc_glob, 0, 0, "BONJOUR", strlen("BONJOUR"));
+		XMapWindow(dpy, mails_fen[i]);
+		XDrawString(dpy, mails_fen[i], gc_glob, MARGIN/2, MARGIN*3/2, "BONJOUR", strlen("BONJOUR"));
 	}
 	
-	XSelectInput(dpy, pop_fen,  ButtonPressMask | ExposureMask);
-	XMapWindow(dpy, pop_fen);	
-	XMapSubwindows(dpy, pop_fen);
-			XDrawString(dpy, mails_fen[i], gc_glob, 0, 0, "BONJOUR", strlen("BONJOUR"));
-			XUnmapSubwindows(dpy, pop_fen);
-				XMapSubwindows(dpy, pop_fen);
-
 	return true;
 }
 
 bool detruire_main_win(){
+	XFreeCursor(dpy, fleche);
+	XFreeCursor(dpy, clic);
 	XDestroySubwindows(dpy, main_fen);
 	//XFreeColors(dpy, DefaultScreen(dpy), color_fond.pixel, 1);
 	//XFreeColors(dpy, DefaultScreen(dpy), color_focus.pixel, 1);
@@ -182,13 +178,18 @@ bool detruire_main_win(){
 	return true;
 }
 bool detruire_log_win(){
+	// peut etre inutile 
+	XUnmapWindow(dpy, log_user_fen);
+	XUnmapWindow(dpy, log_pass_fen);
+	XUnmapWindow(dpy, connect_button);
+
 	XDestroyWindow(dpy, log_user_fen);
 	XDestroyWindow(dpy, log_pass_fen);
 	XDestroyWindow(dpy, connect_button);
-	XFreeCursor(dpy, fleche);
 	return true;
 }
 bool detruire_pop_win(){
+	XDestroySubwindows(dpy, pop_fen);
 	return true;
 }
 
@@ -224,7 +225,6 @@ void change_focus_attibute(Window focus_fen){
 	XMapWindow(dpy, log_user_fen);
 
 	expose();
-	//XFlush(dpy);
 }
 
 void traiter_ButtonPressEvent(XButtonEvent xbp){
@@ -334,6 +334,22 @@ void traiter_event(XEvent e){
 	printf("PAS RECONNU EVENT \n");
 }
 
+
+void traiter_event_mails(XEvent e){
+	if(e.type == Expose){
+		printf("Expose Event\n");
+		return;
+	}
+	if(e.type == ButtonPress){
+		printf("Button Press\n");
+		return;
+	}
+	if(e.type == KeyPress){
+		printf("KeyPress\n");
+		return;
+	}
+	printf("PAS RECONNU EVENT \n");
+}
 
 void initialiser_champs(){
 	user_text[0]='\0';

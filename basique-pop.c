@@ -98,7 +98,6 @@ bool user_handler(char* arg){
 	}
 
 	fflush(fsock);
-	printf("|%s|\n", arg);
 
 	char buff_ans[128];
 	//recuperation reponse
@@ -159,7 +158,7 @@ int list_handler(void){
 
 	if(strncmp(buff_ans, "-ERR", 4) == 0)
 		return -1;
-	return compt_msg;
+	return compt_msg-1;
 }
 
 
@@ -305,7 +304,7 @@ void retr_handler(int id_msg){
 }
 
 
-bool top_handler(int id_msg, int nb_ligne){
+bool top_handler(int id_msg, int nb_ligne, char * sortie){
 	char buff_req[64];
 	sprintf(buff_req, "TOP %d %d\r\n", id_msg, nb_ligne);
 
@@ -317,11 +316,17 @@ bool top_handler(int id_msg, int nb_ligne){
 	char buff_ans[128];
 	//recuperation reponse
 	while(strcmp(fgets(buff_ans, 128, fsock), ".\r\n") != 0){
-		printf("%s", buff_ans);
+		//printf( "%s", buff_ans);
+		if(sortie != NULL){
+			snprintf(sortie, 128, "%s%s", sortie, buff_ans);
+			//printf("%s\n", sortie);
+
+		}
 		if(strncmp(buff_ans, "-ERR", 4) == 0){
 			return false;
 		}
 	}
-	printf("%s", buff_ans);
+	//printf( "%s", buff_ans);
+
 	return true;
 }
