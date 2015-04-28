@@ -43,11 +43,24 @@ int main_cliquable(int argc, char* argv[]){
 	init_log_win();
 	XEvent event;
 
+		//init_connexion
+
+	printf("Trying %s...\n", argv[1]);
+	if(init_connexion(argv[1], atoi(argv[2])) == false){
+		printf("Error initilize connexion\n");
+		exit(EXIT_FAILURE);
+	}
+	printf("Connected to %s\n", argv[1]);
+
 	while(quit_cliquable== false && quit_log == false) {	
 		traiter_event(event);
 
 		if( quit_log == true){
-			if( !(user_handler(user_text) && pass_handler(pass_text)) ){
+			sprintf(user_text, "%s\n", user_text);
+			sprintf(pass_text, "%s\n", pass_text);
+			printf("USER %s\nPASS %s\n", user_text, pass_text);
+			
+			if( !user_handler(user_text) || !pass_handler(pass_text)){
 				initialiser_champs();
 				quit_log= false;
 			}
@@ -55,15 +68,6 @@ int main_cliquable(int argc, char* argv[]){
 		XNextEvent(dpy, &event);
 	}
 
-	//init_connexion
-
-	printf("Trying %s...\n", argv[1]);
-	if(init_connexion(argv[1], atoi(argv[2])) == false){
-		printf("Error initilize connexion\n");
-		exit(EXIT_FAILURE);
-	}
-
-	printf("Connected to %s\n", argv[1]);
 
 	detruire_log_win();
 

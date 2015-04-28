@@ -91,12 +91,14 @@ bool user_handler(char* arg){
 		perror("Error write in socket");
 		exit(EXIT_FAILURE);
 	}
-	fflush(fsock);
 
 	if(fwrite(arg, strlen(arg), sizeof(char), fsock) == -1){
 		perror("Error write in socket");
 		exit(EXIT_FAILURE);
 	}
+
+	fflush(fsock);
+	printf("|%s|\n", arg);
 
 	char buff_ans[128];
 	//recuperation reponse
