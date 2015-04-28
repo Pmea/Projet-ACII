@@ -2,6 +2,7 @@
 
 
 #define CODE_CURS_XC_xterm 152
+#define CODE_CRUS_XC_draft_large 44
 
 #define MARGIN 10
 #define BORDER 2
@@ -31,7 +32,7 @@ XColor color_fond;
 
 GC gc_glob;
 
-Cursor fleche;
+Cursor fleche, clic;
 
 Window focus_fen;
 bool focus_init= false;
@@ -72,6 +73,9 @@ bool init_main_win(){
  	XSetForeground(dpy,gc_glob,BlackPixel(dpy,DefaultScreen(dpy)));
  	XSetBackground(dpy,gc_glob,WhitePixel(dpy,DefaultScreen(dpy))); 
 
+ 	clic= XCreateFontCursor(dpy, CODE_CURS_XC_draft_large);
+	XDefineCursor(dpy, quit_button, clic);
+
 	XSelectInput(dpy, main_fen, KeyPressMask | ExposureMask);
 	XSelectInput(dpy, quit_button,  ButtonPressMask | KeyPressMask | ExposureMask);
 
@@ -108,6 +112,7 @@ bool init_log_win(){
 	fleche= XCreateFontCursor(dpy, CODE_CURS_XC_xterm);
 	XDefineCursor(dpy, log_user_fen, fleche);
 	XDefineCursor(dpy, log_pass_fen, fleche);
+	XDefineCursor(dpy, connect_button, clic);
 	
 	XSelectInput(dpy, log_user_fen, KeyPressMask | ButtonPressMask |  ExposureMask);
 	XSelectInput(dpy, log_pass_fen, KeyPressMask | ButtonPressMask |  ExposureMask);
