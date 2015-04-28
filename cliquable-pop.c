@@ -40,7 +40,7 @@ XFontStruct *font;
 
 XColor color_fond;
 XColor color_focus;
-XColor color_plus_cliquable;
+XColor color_fond_de_fen;
 
 
 GC gc_glob;
@@ -61,7 +61,7 @@ bool init_main_win(){
 
 	XAllocNamedColor(dpy, DefaultColormap(dpy, DefaultScreen(dpy)), "grey", &color_fond, &color_fond);
 	XAllocNamedColor(dpy, DefaultColormap(dpy, DefaultScreen(dpy)), "DimGrey", &color_focus, &color_focus);
-	XAllocNamedColor(dpy, DefaultColormap(dpy, DefaultScreen(dpy)), "LightGrey", &color_plus_cliquable , &color_plus_cliquable );
+	XAllocNamedColor(dpy, DefaultColormap(dpy, DefaultScreen(dpy)), "WhiteSmoke", &color_fond_de_fen , &color_fond_de_fen );
 
 
   	main_fen = XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0,
@@ -69,7 +69,7 @@ bool init_main_win(){
 					       HEIGHT_MAIN,
 					       BORDER, 
 					       BlackPixel(dpy,DefaultScreen(dpy)),
-					       WhitePixel(dpy,DefaultScreen(dpy)));
+					       color_fond_de_fen.pixel);
 
   	quit_button=  XCreateSimpleWindow(dpy, main_fen, MARGIN, HEIGHT_MAIN  -MARGIN - HEIGHT_BUTTON,
 					       WIDTH_BUTTON,
@@ -148,9 +148,9 @@ bool init_pop_win(int nb_mail, char ** top_mails){
 	pop_fen= XCreateSimpleWindow(dpy, main_fen, MARGIN, MARGIN*6,
 					       WIDTH_MAIL,
 					       HEIGHT_MAIL,
-					       BORDER, 
+					       BORDER,
 					       BlackPixel(dpy,DefaultScreen(dpy)),
-					       color_plus_cliquable.pixel);
+					       color_fond.pixel);
 	XSelectInput(dpy, pop_fen,  ButtonPressMask | ExposureMask);
 	XMapWindow(dpy, pop_fen);
 	int i;
@@ -178,7 +178,7 @@ bool detruire_main_win(){
 	XDestroySubwindows(dpy, main_fen);
 	//XFreeColors(dpy, DefaultScreen(dpy), color_fond.pixel, 1);
 	//XFreeColors(dpy, DefaultScreen(dpy), color_focus.pixel, 1);
-	//XFreeColors(dpy, DefaultScreen(dpy), color_plus_cliquable.pixel, 1);
+	//XFreeColors(dpy, DefaultScreen(dpy), color_fond_de_fen.pixel, 1);
 	XFreeGC(dpy, gc_glob);
 	XFreeFont(dpy, font);
 	XCloseDisplay(dpy);
@@ -343,7 +343,7 @@ void expose_mail(void){
 	int i;
 	for(i=0; i<nb_mails; i++){
 		if(recup_mail[i]== true)
-			XSetWindowBackground(dpy, mails_fen[i], color_plus_cliquable.pixel);
+			XSetWindowBackground(dpy, mails_fen[i], color_focus.pixel);
 		XUnmapWindow(dpy, mails_fen[i]);
 		XMapWindow(dpy, mails_fen[i]);
 		XDrawString(dpy, mails_fen[i], gc_glob, MARGIN/2, MARGIN*3/2, mails_text[i], strlen(mails_text[i]));

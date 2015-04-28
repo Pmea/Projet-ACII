@@ -98,7 +98,6 @@ int main_cliquable(int argc, char* argv[]){
 
 	while(quit_cliquable== false && quit_log == false) {	
 		traiter_event(event);
-
 		if( quit_log == true){
 			sprintf(user_text, "%s\n", user_text);
 			sprintf(pass_text, "%s\n", pass_text);
@@ -134,12 +133,12 @@ int main_cliquable(int argc, char* argv[]){
 
 		XEvent event_mails;
 		while(quit_cliquable == false){
-			traiter_event_mails(event_mails);
 			XNextEvent(dpy, &event_mails);
+			traiter_event_mails(event_mails);
 		}
+		detruire_pop_win();
 	}
 	printf("QUIT\n");
-	detruire_pop_win();
 	detruire_main_win();
 
 	if(close_connexion() == false){
