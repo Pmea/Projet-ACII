@@ -1,5 +1,5 @@
 CC= gcc
-CFLAGS= -Wall -Werror -g -lm
+CFLAGS= -Wall -Werror -g -lm -lX11
 
 
 all: main-pop
@@ -25,16 +25,16 @@ main-pop: main-pop.o basique-pop.o cliquable-pop.o graphique-pop.o liste_mime.o
 
 #Excercice 1
 t-test: main-pop 
-	textuel
+	./main-pop 127.0.0.1 110 -t
 
 
 #Excercice 2
 c-test: main-pop
-	cliquable
+	./main-pop 127.0.0.1 110 -c
 
 #Excercice 3
 g-test: main-pop
-	graphique
+	./main-pop 127.0.0.1 110 -g
 
 
 clean:

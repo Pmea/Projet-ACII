@@ -27,11 +27,11 @@ char option(int argc, char* argv[]){
 	char choix= 0;
 	int i;
 	for(i=3; i<argc; i++){
-		if(strncmp(argv[i], "-t", 2))
+		if(strncmp(argv[i], "-t", 2) == 0)
 			choix+= 't';
-		if(strncmp(argv[i], "-c", 2))
+		if(strncmp(argv[i], "-c", 2) == 0)
 			choix+= 'c';
-		if(strncmp(argv[i], "-g", 2))
+		if(strncmp(argv[i], "-g", 2) == 0)
 			choix+= 'g';
 	}
 	return choix;
@@ -39,6 +39,17 @@ char option(int argc, char* argv[]){
 
 
 int main_cliquable(int argc, char* argv[]){
+	init_main_win();
+	init_log_win();
+	XEvent event;
+
+	bool quit=false;
+	while(quit== false) {	
+		quit=true;
+		XNextEvent(dpy, &event);
+	}
+
+	detruire_main_win();
 	return EXIT_SUCCESS;
 }
 
@@ -167,6 +178,8 @@ int main (int argc, char* argv[]){
 		case 'g':
 			main_graphique(argc, argv);
 			break;
+		default:
+			printf("Erreur dans les options\n");
 	}
 
 
