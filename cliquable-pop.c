@@ -139,7 +139,7 @@ bool init_log_win(){
 	return true;
 }
 
-bool init_pop_win(int nb_mail){
+bool init_pop_win(int nb_mail, char ** top_mails){
 
 	pop_fen= XCreateSimpleWindow(dpy, main_fen, MARGIN, MARGIN*6,
 					       WIDTH_MAIL,
@@ -149,18 +149,25 @@ bool init_pop_win(int nb_mail){
 					       color_fond.pixel);
 
 	int i;
+
 	for(i=0; i<nb_mail; i++){
-		mails_fen[i]=  XCreateSimpleWindow(dpy, pop_fen, MARGIN, MARGIN*6 + HEIGHT_LOG * i,
+		mails_fen[i]=  XCreateSimpleWindow(dpy, pop_fen, -  BORDER, -BORDER + HEIGHT_LOG * i,
 					       WIDTH_MAIL,
 					       HEIGHT_MAIL,
 					       BORDER, 
 					       BlackPixel(dpy,DefaultScreen(dpy)),
 					       color_fond.pixel);
+		XSelectInput(dpy, mails_fen[i],  ButtonPressMask | ExposureMask);
+		XDrawString(dpy, mails_fen[i], gc_glob, 0, 0, "BONJOUR", strlen("BONJOUR"));
 	}
 	
 	XSelectInput(dpy, pop_fen,  ButtonPressMask | ExposureMask);
 	XMapWindow(dpy, pop_fen);	
-	XMapSubwindows(dpy, pop_fen);			
+	XMapSubwindows(dpy, pop_fen);
+			XDrawString(dpy, mails_fen[i], gc_glob, 0, 0, "BONJOUR", strlen("BONJOUR"));
+			XUnmapSubwindows(dpy, pop_fen);
+				XMapSubwindows(dpy, pop_fen);
+
 	return true;
 }
 
