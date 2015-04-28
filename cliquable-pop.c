@@ -9,12 +9,14 @@
 #define WIDTH_LOG 350
 #define HEIGHT_LOG 25
 
+#define WIDTH_BUTTON 75
+#define HEIGHT_BUTTON 20
+
 #define WIDTH_MAIN WIDTH_LOG*2 + MARGIN * 3 + BORDER * 4 
 #define HEIGHT_MAIN 300
 
-#define MAX_LENGTH 56
 
-Display * dpy;
+
 Window main_fen;
 
 Window log_user_fen;
@@ -22,6 +24,8 @@ Window log_pass_fen;
 
 Window quit_button;
 Window connect_button;
+
+XFontStruct *font;
 
 XColor color_fond;
 
@@ -33,8 +37,7 @@ Window focus_fen;
 bool focus_init= false;
 XColor color_focus;
 
-char user_text[MAX_LENGTH]="";
-char pass_text[MAX_LENGTH]="";
+
 
 bool init_main_win(){
 	if ((dpy = XOpenDisplay(NULL)) == NULL){
@@ -52,7 +55,13 @@ bool init_main_win(){
 					       BlackPixel(dpy,DefaultScreen(dpy)),
 					       WhitePixel(dpy,DefaultScreen(dpy)));
 
-	XFontStruct *font=NULL;
+  	quit_button=  XCreateSimpleWindow(dpy, main_fen, MARGIN, HEIGHT_MAIN  -MARGIN - HEIGHT_BUTTON,
+					       WIDTH_BUTTON,
+					       HEIGHT_BUTTON,
+					       BORDER, 
+					       BlackPixel(dpy,DefaultScreen(dpy)),
+					       color_fond.pixel);
+
 	if ((font=XLoadQueryFont(dpy,"fixed"))==NULL){
 	 	fprintf(stderr," Sorry, having font problems.\n");
 	    exit(-1);
@@ -63,14 +72,17 @@ bool init_main_win(){
  	XSetForeground(dpy,gc_glob,BlackPixel(dpy,DefaultScreen(dpy)));
  	XSetBackground(dpy,gc_glob,WhitePixel(dpy,DefaultScreen(dpy))); 
 
-	XSelectInput(dpy, main_fen, KeyPressMask |  ExposureMask);
+	XSelectInput(dpy, main_fen, KeyPressMask | ExposureMask);
+	XSelectInput(dpy, quit_button,  ButtonPressMask | KeyPressMask | ExposureMask);
 
-  	XMapWindow(dpy, main_fen);
+	XMapWindow(dpy, main_fen);
+  	XMapSubwindows(dpy, main_fen);
 	XFlush(dpy);
 
 	return true;
 }
 bool init_log_win(){
+	initialiser_champs();
 
 	log_user_fen=  XCreateSimpleWindow(dpy, main_fen, MARGIN, MARGIN,
 					       WIDTH_LOG,
@@ -86,6 +98,12 @@ bool init_log_win(){
 					       BlackPixel(dpy,DefaultScreen(dpy)),
 					       color_fond.pixel);
 
+	connect_button=  XCreateSimpleWindow(dpy, main_fen, WIDTH_MAIN - MARGIN - WIDTH_BUTTON, HEIGHT_MAIN  -MARGIN - HEIGHT_BUTTON,
+					       WIDTH_BUTTON,
+					       HEIGHT_BUTTON,
+					       BORDER, 
+					       BlackPixel(dpy,DefaultScreen(dpy)),
+					       color_fond.pixel);
 
 	fleche= XCreateFontCursor(dpy, CODE_CURS_XC_xterm);
 	XDefineCursor(dpy, log_user_fen, fleche);
@@ -93,9 +111,13 @@ bool init_log_win(){
 	
 	XSelectInput(dpy, log_user_fen, KeyPressMask | ButtonPressMask |  ExposureMask);
 	XSelectInput(dpy, log_pass_fen, KeyPressMask | ButtonPressMask |  ExposureMask);
+	XSelectInput(dpy, connect_button, ButtonPressMask | KeyPressMask | ExposureMask);
+
 
 	XMapWindow(dpy, log_pass_fen);		
 	XMapWindow(dpy, log_user_fen);
+	XMapWindow(dpy, connect_button);
+
 	XFlush(dpy);
 	return true;
 }
@@ -108,12 +130,14 @@ bool detruire_main_win(){
 	XDestroySubwindows(dpy, main_fen);
 	//XFreeColors(dpy, DefaultScreen(dpy), color_fond.pixel, 1);
 	XFreeGC(dpy, gc_glob);
+	XFreeFont(dpy, font);
 	XCloseDisplay(dpy);
 	return true;
 }
 bool detruire_log_win(){
 	XDestroyWindow(dpy, log_user_fen);
 	XDestroyWindow(dpy, log_pass_fen);
+	XDestroyWindow(dpy, connect_button);
 	XFreeCursor(dpy, fleche);
 	return true;
 }
@@ -123,8 +147,11 @@ bool detruire_pop_win(){
 
 
 void expose(void){
-	XDrawString(dpy, log_user_fen, gc_glob, MARGIN, MARGIN*3/2, user_text, strlen(user_text));
-	XDrawString(dpy, log_pass_fen, gc_glob, MARGIN, MARGIN*3/2, pass_text, strlen(pass_text));
+	XDrawString(dpy, log_user_fen, gc_glob, MARGIN/2, MARGIN*3/2, user_text, strlen(user_text));
+	XDrawString(dpy, log_pass_fen, gc_glob, MARGIN/2, MARGIN*3/2, pass_text, strlen(pass_text));
+	XDrawString(dpy, quit_button, gc_glob, MARGIN/2, MARGIN*3/2, "Quit", strlen("Quit"));
+	XDrawString(dpy, connect_button, gc_glob, MARGIN/2, MARGIN*3/2, "Connection", strlen("Connection"));
+
 }
 
 void traiter_ExposeEvent(XExposeEvent xee){
@@ -135,7 +162,6 @@ void traiter_ExposeEvent(XExposeEvent xee){
 		expose();
 	}
 }
-
 
 void change_focus_attibute(Window focus_fen){
 	XSetWindowBackground(dpy, log_user_fen, color_fond.pixel);
@@ -156,8 +182,16 @@ void traiter_ButtonPressEvent(XButtonEvent xbp){
 	printf("ButtonPress Event\n");
 	focus_fen= xbp.window;
 	change_focus_attibute(focus_fen);
-
 	focus_init=true;
+
+	if(focus_fen == quit_button){
+		printf("Quit\n");
+		quit_cliquable=true;
+	}
+	if(focus_fen == connect_button){
+		printf("CONNECTION\n");
+		quit_log=true;
+	}
 	printf("CHANGEMENT DE FOCUS\n");
 }
 
@@ -169,8 +203,9 @@ bool est_caractere_valide(char* key, KeySym sym){
 	return (key[0] >= '!' && key[0] <= '~')  || sym == XK_space;
 }
 
+
 void traiter_KeyPressEvent(XKeyEvent xke){
-	if( focus_init == false)
+	if(focus_init == false)
 		return; 
 
 	printf("KeyPress event\n");
@@ -182,13 +217,13 @@ void traiter_KeyPressEvent(XKeyEvent xke){
 		XClearWindow(dpy, focus_fen);
 			if(strlen(user_text) > 0){
 				user_text[strlen(user_text) -1]= '\0';
-				XDrawString(dpy, log_user_fen, gc_glob, MARGIN, MARGIN*3/2, user_text, strlen(user_text));
+				XDrawString(dpy, log_user_fen, gc_glob, MARGIN/2, MARGIN*3/2, user_text, strlen(user_text));
 			}
 		
 			if(focus_fen == log_pass_fen){
 			if(strlen(pass_text) > 0){
 				pass_text[strlen(pass_text) -1]= '\0';
-				XDrawString(dpy, log_pass_fen, gc_glob, MARGIN, MARGIN*3/2, pass_text, strlen(pass_text));
+				XDrawString(dpy, log_pass_fen, gc_glob, MARGIN/2, MARGIN*3/2, pass_text, strlen(pass_text));
 			}
 		}
 	}
@@ -210,13 +245,13 @@ void traiter_KeyPressEvent(XKeyEvent xke){
 		if(focus_fen == log_user_fen){
 			if( strlen(user_text) < MAX_LENGTH){
 				sprintf(user_text, "%s%s", user_text, key);
-				XDrawString(dpy, log_user_fen, gc_glob, MARGIN, MARGIN*3/2, user_text, strlen(user_text));
+				XDrawString(dpy, log_user_fen, gc_glob, MARGIN/2, MARGIN*3/2, user_text, strlen(user_text));
 			}
 		}
 		if(focus_fen == log_pass_fen){
 			if( strlen(pass_text) < MAX_LENGTH){
 				sprintf(pass_text, "%s%s", pass_text, key);
-				XDrawString(dpy, log_pass_fen, gc_glob, MARGIN, MARGIN*3/2, pass_text, strlen(pass_text));		
+				XDrawString(dpy, log_pass_fen, gc_glob, MARGIN/2, MARGIN*3/2, pass_text, strlen(pass_text));		
 			}
 		}
 	}
@@ -224,6 +259,7 @@ void traiter_KeyPressEvent(XKeyEvent xke){
 		printf("caractere non valide\n");
 	}
 }
+
 
 void traiter_event(XEvent e){
 
@@ -239,6 +275,12 @@ void traiter_event(XEvent e){
 		traiter_KeyPressEvent(e.xkey);
 		return;
 	}
+	
 	printf("PAS RECONNU EVENT \n");
+}
 
+
+void initialiser_champs(){
+	user_text[0]='\0';
+	pass_text[0]='\0';
 }

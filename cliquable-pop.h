@@ -20,28 +20,30 @@
 #include "basique-pop.h"
 #include "graphique-pop.h"
 
+#define MAX_LENGTH 56
+
+
+bool quit_cliquable;
+bool quit_log;
+
+
 
 Display * dpy;
-Window main_fen;
 
-Window log_user_fen;
-Window log_pass_fen;
-XColor color_fond;
-
-GC gc_glob;
-
-Cursor fleche;
+char user_text[MAX_LENGTH];
+char pass_text[MAX_LENGTH];
 
 
-bool init_main_win();
-bool init_log_win();
-bool init_pop_win();
+bool init_main_win(void);
+bool init_log_win(void);
+bool init_pop_win(void);
 
-bool detruire_main_win();
-bool detruire_log_win();
-bool detruire_pop_win();
+bool detruire_main_win(void);
+bool detruire_log_win(void);
+bool detruire_pop_win(void);
 
 
 void traiter_event(XEvent e);
+void initialiser_champs(void);
 
 #endif /*CLICABLE_POP_H*/

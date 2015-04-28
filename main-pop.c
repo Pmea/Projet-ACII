@@ -43,13 +43,40 @@ int main_cliquable(int argc, char* argv[]){
 	init_log_win();
 	XEvent event;
 
-	bool quit=false;
-	while(quit== false) {	
+	while(quit_cliquable== false && quit_log == false) {	
 		traiter_event(event);
+
+		if( quit_log == true){
+			if( !(user_handler(user_text) && pass_handler(pass_text)) ){
+				initialiser_champs();
+				quit_log== false;
+			}
+		}
+		XNextEvent(dpy, &event);
+	}
+
+	//init_connexion
+
+	printf("Trying %s...\n", argv[1]);
+	if(init_connexion(argv[1], atoi(argv[2])) == false){
+		printf("Error initilize connexion\n");
+		exit(EXIT_FAILURE);
+	}
+
+	printf("Connected to %s\n", argv[1]);
+
+	detruire_log_win();
+
+	while(quit_cliquable == false){
 		XNextEvent(dpy, &event);
 	}
 
 	detruire_main_win();
+
+	if(close_connexion() == false){
+		printf("Error close connexion\n");
+		exit(EXIT_FAILURE);
+	}
 	return EXIT_SUCCESS;
 }
 
