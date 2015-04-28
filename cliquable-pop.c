@@ -15,10 +15,10 @@
 #define HEIGHT_BUTTON 20
 
 #define WIDTH_MAIL WIDTH_LOG*2 + MARGIN + BORDER *2
-#define HEIGHT_MAIL 300 
+#define HEIGHT_MAIL 10 * HEIGHT_LOG
 
 #define WIDTH_MAIN WIDTH_LOG*2 + MARGIN * 3 + BORDER * 4 
-#define HEIGHT_MAIN 400
+#define HEIGHT_MAIN 110 + HEIGHT_MAIL
 
 
 
@@ -32,6 +32,9 @@ Window connect_button;
 
 Window pop_fen;
 Window mails_fen[N];
+char mails_text[N][1024];
+int nb_mails;
+bool recup_mail[N];
 
 XFontStruct *font;
 
@@ -140,6 +143,7 @@ bool init_log_win(){
 }
 
 bool init_pop_win(int nb_mail, char ** top_mails){
+	nb_mails=nb_mail;
 
 	pop_fen= XCreateSimpleWindow(dpy, main_fen, MARGIN, MARGIN*6,
 					       WIDTH_MAIL,
@@ -158,8 +162,11 @@ bool init_pop_win(int nb_mail, char ** top_mails){
 					       BlackPixel(dpy,DefaultScreen(dpy)),
 					       color_fond.pixel);
 		XSelectInput(dpy, mails_fen[i],  ButtonPressMask | ExposureMask);
+		
+		strncpy(mails_text[i], top_mails[i], 1024);
 		XMapWindow(dpy, mails_fen[i]);
-		XDrawString(dpy, mails_fen[i], gc_glob, MARGIN/2, MARGIN*3/2, top_mails[i], strlen(top_mails[i]));
+
+		XDrawString(dpy, mails_fen[i], gc_glob, MARGIN/2, MARGIN*3/2, mails_text[i], strlen(mails_text[i]));
 	}
 	
 	return true;
@@ -178,11 +185,6 @@ bool detruire_main_win(){
 	return true;
 }
 bool detruire_log_win(){
-	// peut etre inutile 
-	XUnmapWindow(dpy, log_user_fen);
-	XUnmapWindow(dpy, log_pass_fen);
-	XUnmapWindow(dpy, connect_button);
-
 	XDestroyWindow(dpy, log_user_fen);
 	XDestroyWindow(dpy, log_pass_fen);
 	XDestroyWindow(dpy, connect_button);
@@ -242,6 +244,7 @@ void traiter_ButtonPressEvent(XButtonEvent xbp){
 	if(focus_fen == quit_button){
 		printf("Quit\n");
 		quit_cliquable=true;
+		return;
 	}
 	if(focus_fen == connect_button){
 		printf("CONNECTION\n");
@@ -336,13 +339,40 @@ void traiter_event(XEvent e){
 
 
 
+void expose_mail(void){
+	int i;
+	for(i=0; i<nb_mails; i++){
+		if(recup_mail[i]== true)
+			XSetWindowBackground(dpy, mails_fen[i], color_plus_cliquable.pixel);
+		XUnmapWindow(dpy, mails_fen[i]);
+		XMapWindow(dpy, mails_fen[i]);
+		XDrawString(dpy, mails_fen[i], gc_glob, MARGIN/2, MARGIN*3/2, mails_text[i], strlen(mails_text[i]));
+	}
+}
+
+void traiter_ButtonPress_sur_mail(XButtonEvent xbe){
+	if(xbe.window == quit_button){
+		printf("Quit\n");
+		quit_cliquable=true;
+		return;
+	}
+
+	int i;
+	for(i=0; i<nb_mails; i++){
+		if(mails_fen[i] ==  xbe.window){
+			//recuperer email
+			recup_mail[i]=true;
+		}
+	}
+	expose_mail();
+}
+
 void traiter_event_mails(XEvent e){
 	if(e.type == Expose){
-		printf("Expose Event\n");
 		return;
 	}
 	if(e.type == ButtonPress){
-		printf("Button Press\n");
+		traiter_ButtonPress_sur_mail(e.xbutton);
 		return;
 	}
 	printf("PAS RECONNU EVENT \n");

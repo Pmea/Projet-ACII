@@ -44,13 +44,10 @@ void preparer_pour_affichage(int nb_du_msg, char* top){
 	char* buff_form= (char*) malloc(sizeof(char) * 1024);
 	char* buff_date= (char*) malloc(sizeof(char) * 1024);;
 
-	printf("||%s\n||", top);
-
 	const int n_matches= 2;
 	regmatch_t m[n_matches];
 	int match= regexec(&r_from, top, n_matches, m, 0);
 	if(match != REG_NOMATCH){
-		printf("MATCH\n");
 		buff_form=strndup(top + (int) m[1].rm_so, m[1].rm_eo - m[1].rm_so );
 	}
 	else{
@@ -66,7 +63,6 @@ void preparer_pour_affichage(int nb_du_msg, char* top){
 	}
 
 	sprintf(top, "%d From: %s Date: %s", nb_du_msg, buff_form, buff_date);
-	printf("%s\n", top);
 	free(buff_form);
 	free(buff_date);
 }
@@ -117,28 +113,32 @@ int main_cliquable(int argc, char* argv[]){
 	}
 
 	detruire_log_win();
-	int nb_msg= list_handler();
+	
+	if(quit_log == true){
+		int nb_msg= list_handler();
 
-	char ** top_tab= (char**) malloc(sizeof(char*) * nb_msg);
-	int i;
-	for(i= 1; i<=nb_msg; i++){
-		top_tab[i-1]= (char*) malloc(sizeof(char) * 1024);
-		top_handler(i, 0, top_tab[i-1]);
-		preparer_pour_affichage(i, top_tab[i-1]);
+		char ** top_tab= (char**) malloc(sizeof(char*) * nb_msg);
+		int i;
+		for(i= 1; i<=nb_msg; i++){
+			top_tab[i-1]= (char*) malloc(sizeof(char) * 1024);
+			top_handler(i, 0, top_tab[i-1]);
+			preparer_pour_affichage(i, top_tab[i-1]);
+		}
+
+		init_pop_win(nb_msg, top_tab);
+
+		for(i=0; i<nb_msg; i++){
+			free(top_tab[i]);
+		}
+		free(top_tab);
+
+		XEvent event_mails;
+		while(quit_cliquable == false){
+			traiter_event_mails(event_mails);
+			XNextEvent(dpy, &event_mails);
+		}
 	}
-
-	init_pop_win(nb_msg, top_tab);
-
-	for(i=0; i<nb_msg; i++){
-		free(top_tab[i]);
-	}
-	free(top_tab);
-
-	XEvent event_mails;
-	while(quit_cliquable == false){
-		traiter_event_mails(event_mails);
-		XNextEvent(dpy, &event_mails);
-	}
+	printf("QUIT\n");
 	detruire_pop_win();
 	detruire_main_win();
 
