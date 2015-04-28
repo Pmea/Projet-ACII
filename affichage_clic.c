@@ -72,7 +72,6 @@ XCloseDisplay(dpy);
 void get_event(XEvent e){
 	focus_fen= e.xany.window;
 	
-
 	char text[16];
 	text[0]='\0';
 	printf("EVENT\n");

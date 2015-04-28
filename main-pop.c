@@ -45,7 +45,7 @@ int main_cliquable(int argc, char* argv[]){
 
 	bool quit=false;
 	while(quit== false) {	
-		quit=true;
+		traiter_event(event);
 		XNextEvent(dpy, &event);
 	}
 

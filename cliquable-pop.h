@@ -42,4 +42,6 @@ bool detruire_log_win();
 bool detruire_pop_win();
 
 
+void traiter_event(XEvent e);
+
 #endif /*CLICABLE_POP_H*/

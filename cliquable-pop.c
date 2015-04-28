@@ -12,6 +12,9 @@
 #define WIDTH_MAIN WIDTH_LOG*2 + MARGIN * 3 + BORDER * 4 
 #define HEIGHT_MAIN 300
 
+
+Window focus_fen;
+
 bool init_main_win(){
 	if ((dpy = XOpenDisplay(NULL)) == NULL){
   		printf("Erro open display");
@@ -92,4 +95,36 @@ bool detruire_log_win(){
 }
 bool detruire_pop_win(){
 	return true;
+}
+
+
+void traiter_ExposeEvent(XExposeEvent xee){
+	printf("Expose Event\n");
+}
+
+void traiter_ButtonPressEvent(XButtonEvent xbp){
+	printf("ButtonPress Event\n");
+}
+
+void traiter_KeyPressEvent(XKeyEvent xke){
+	printf("KeyPress event\n");
+}
+
+void traiter_event(XEvent e){
+	focus_fen= e.xany.window;
+	
+	if(e.type == Expose){
+		traiter_ExposeEvent(e.xexpose);
+		return;
+	}
+	if(e.type == ButtonPress){
+		traiter_ButtonPressEvent(e.xbutton);
+		return;
+	}
+	if(e.type == KeyPress){
+		traiter_KeyPressEvent(e.xkey);
+		return;
+	}
+	printf("PAS RECONNU EVENT \n");
+	
 }
