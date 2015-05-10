@@ -153,6 +153,70 @@ int main_cliquable(int argc, char* argv[]){
 }
 
 int main_graphique(int argc, char* argv[]){
+	init_main_win();
+	init_log_win();
+	XEvent event;
+
+		//init_connexion
+
+	printf("Trying %s...\n", argv[1]);
+	if(init_connexion(argv[1], atoi(argv[2])) == false){
+		printf("Error initilize connexion\n");
+		exit(EXIT_FAILURE);
+	}
+	printf("Connected to %s\n", argv[1]);
+
+	while(quit_cliquable== false && quit_log == false) {	
+		traiter_event(event);
+		if( quit_log == true){
+			sprintf(user_text, "%s\n", user_text);
+			sprintf(pass_text, "%s\n", pass_text);
+			printf("USER %s\nPASS %s\n", user_text, pass_text);
+			if( !user_handler(user_text) || !pass_handler(pass_text)){
+				initialiser_champs();
+				afficher_msg("Identifiant non valide");
+				quit_log= false;
+			}
+		}
+		XNextEvent(dpy, &event);
+	}
+
+	detruire_log_win();
+	
+	if(quit_log == true){
+		int nb_msg= list_handler();
+
+		char ** top_tab= (char**) malloc(sizeof(char*) * nb_msg);
+		int i;
+		for(i= 1; i<=nb_msg; i++){
+			top_tab[i-1]= (char*) malloc(sizeof(char) * 1024);
+			top_handler(i, 0, top_tab[i-1]);
+			preparer_pour_affichage(i, top_tab[i-1]);
+		}
+
+		init_pop_win(nb_msg, top_tab);
+
+		for(i=0; i<nb_msg; i++){
+			printf("FREE TOP[i]\n");
+			free(top_tab[i]);
+		}
+		printf("FREE TOPTOTAL\n");
+		free(top_tab);
+
+		XEvent event_mails;
+		while(quit_cliquable == false){
+			XNextEvent(dpy, &event_mails);
+			traiter_event_mails_graphique(event_mails);
+		}
+		detruire_pop_win();
+	}
+	printf("QUIT\n");
+	detruire_main_win();
+
+	if(close_connexion() == false){
+		printf("Error close connexion\n");
+		exit(EXIT_FAILURE);
+	}
 	return EXIT_SUCCESS;
 }
 
