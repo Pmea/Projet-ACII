@@ -273,17 +273,19 @@ void traiter_KeyPressEvent(XKeyEvent xke){
 
 	if( sym == XK_BackSpace){
 		XClearWindow(dpy, focus_fen);
-			if(strlen(user_text) > 0){
-				user_text[strlen(user_text) -1]= '\0';
-				XDrawString(dpy, log_user_fen, gc_glob, MARGIN/2, MARGIN*3/2, user_text, strlen(user_text));
+			if(focus_fen == log_user_fen){
+				if(strlen(user_text) > 0){
+					user_text[strlen(user_text) -1]= '\0';
+					XDrawString(dpy, log_user_fen, gc_glob, MARGIN/2, MARGIN*3/2, user_text, strlen(user_text));
+				}
 			}
 		
 			if(focus_fen == log_pass_fen){
-			if(strlen(pass_text) > 0){
-				pass_text[strlen(pass_text) -1]= '\0';
-				XDrawString(dpy, log_pass_fen, gc_glob, MARGIN/2, MARGIN*3/2, pass_text, strlen(pass_text));
+				if(strlen(pass_text) > 0){
+					pass_text[strlen(pass_text) -1]= '\0';
+					XDrawString(dpy, log_pass_fen, gc_glob, MARGIN/2, MARGIN*3/2, pass_text, strlen(pass_text));
+				}
 			}
-		}
 	}
 
 	if( sym == XK_Tab){
