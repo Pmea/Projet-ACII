@@ -21,7 +21,6 @@
 #define HEIGHT_MAIN 110 + HEIGHT_MAIL
 
 
-
 Window main_fen;
 
 Window log_user_fen;

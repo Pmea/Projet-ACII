@@ -46,6 +46,8 @@ bool detruire_pop_win(void);
 
 void traiter_event(XEvent e);
 void traiter_event_mails(XEvent e);
+void traiter_ExposeEvent_mail(XExposeEvent xee);
+
 void initialiser_champs(void);
 void afficher_msg(char* msg);
 
