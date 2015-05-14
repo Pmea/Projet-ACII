@@ -1,5 +1,5 @@
 CC= gcc
-CFLAGS= -Wall -Werror -g -lm -lX11
+CFLAGS= -Wall  -g -lm -lX11
 
 
 all: main-pop
