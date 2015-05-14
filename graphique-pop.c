@@ -240,47 +240,6 @@ void traiter_ButtonRelease_sur_mail_graphique(XButtonEvent  xbe){
 	}
 }
 
-
-void traiter_ButtonPress_sur_mail_graphique(XButtonEvent  xbe){	// besoin de regarder la fenetre !! main ou l'autre 
-	printf("buttonPress event\n");
-	if(xbe.window == quit_button){
-		printf("Quit fenetre\n");
-		destroy_mail_win_graphique();
-		return;
-	}
-
-	if(xbe.window == slider){
-		printf("SLIDER clic\n");
-		XEvent tmp;
-			XNextEvent(dpy, &tmp);
-
-		int pos= xbe.y_root;
-		while(tmp.type != ButtonRelease){
-			printf("BOUCLE\n");
-			if(tmp.type == MotionNotify){
-				// if dans les bornes
-
-				int diff= pos - tmp.xmotion.y_root;
-				pos= tmp.xmotion.y_root;
-
-				if(posslider+diff <= 0 && posslider+diff >= -1*(HEIGHT_MAIL_CONTENU- HEIGHT_SLIDER))
-				XMoveWindow(dpy, slider, 0, -1 * (posslider + diff) );
-				posslider+= diff;
-			}
-			XNextEvent(dpy, &tmp);
-		}
-		return;
-	}
-	// if pas deja dans la liste
-	int tmp= numero_msg(xbe.window);
-	if( tmp == -1){
-		printf("Erreur lors de la recherche du numero de message\n");
-		exit(EXIT_FAILURE);
-	}
-	init_mail_win_graphique(tmp);
-}
-
-
 void expose_graphique(Window win){
 	//chercher la fenetre qui a recu le expose
 	XDrawString(dpy, quit_button, gc_glob, MARGIN/2, MARGIN*3/2, "Quit", strlen("Quit"));
@@ -301,10 +260,53 @@ void expose_graphique(Window win){
 			i++;
 		}
 	}
-	else{
-		printf("NULL\n");
-	}
 }
+
+
+void traiter_ButtonPress_sur_mail_graphique(XButtonEvent  xbe){	// besoin de regarder la fenetre !! main ou l'autre 
+	printf("buttonPress event\n");
+	if(xbe.window == quit_button){
+		printf("Quit fenetre\n");
+		destroy_mail_win_graphique();
+		return;
+	}
+
+	if(xbe.window == slider){
+		printf("SLIDER clic\n");
+		XEvent tmp;
+		XNextEvent(dpy, &tmp);
+
+		int pos= xbe.y_root;
+		while(tmp.type != ButtonRelease){
+			printf("BOUCLE\n");
+			if(tmp.type == Expose){
+				expose_graphique(slider);
+			}
+
+			if(tmp.type == MotionNotify){
+				int diff= pos - tmp.xmotion.y_root;
+				pos= tmp.xmotion.y_root;
+
+				if(posslider+diff <= 0 && posslider+diff >= -1*(HEIGHT_MAIL_CONTENU- HEIGHT_SLIDER))
+					XMoveWindow(dpy, slider, 0, -1 * (posslider + diff) );
+				posslider+= diff;
+				if(posslider+diff <= 0 && posslider+diff >= -1*(HEIGHT_MAIL_CONTENU- HEIGHT_SLIDER))
+					XMoveWindow(dpy, mail_contenu_inter,0, ((posslider + diff)*height_contenu_inter) / HEIGHT_MAIL_CONTENU );
+			}
+			XNextEvent(dpy, &tmp);
+		}
+		return;
+	}
+	// if pas deja dans la liste
+	int tmp= numero_msg(xbe.window);
+	if( tmp == -1){
+		printf("Erreur lors de la recherche du numero de message\n");
+		exit(EXIT_FAILURE);
+	}
+	init_mail_win_graphique(tmp);
+}
+
+
 
 void traiter_ExposeEvent_mail_graphique(XExposeEvent xee){
 	printf("Expose Event: %d\n", xee.count);

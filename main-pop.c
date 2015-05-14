@@ -89,7 +89,7 @@ int main_cliquable(int argc, char* argv[]){
 	init_log_win();
 	XEvent event;
 
-		//init_connexion
+	//init_connexion
 
 	printf("Trying %s...\n", argv[1]);
 	if(init_connexion(argv[1], atoi(argv[2])) == false){
@@ -157,7 +157,7 @@ int main_graphique(int argc, char* argv[]){
 	init_log_win();
 	XEvent event;
 
-		//init_connexion
+	//init_connexion
 
 	printf("Trying %s...\n", argv[1]);
 	if(init_connexion(argv[1], atoi(argv[2])) == false){
@@ -298,7 +298,7 @@ int main_textuel(int argc, char* argv[]){
 						//traiter commande
 						int msg_id;
 						msg_id= atoi(cmd+indice); 
-						retr_handler(msg_id);
+						retr_handler(msg_id, NULL);
 					}
 				}
 				break;
