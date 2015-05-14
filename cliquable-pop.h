@@ -27,7 +27,6 @@ bool quit_cliquable;
 bool quit_log;
 
 
-
 Display * dpy;
 
 char user_text[MAX_LENGTH];
@@ -50,5 +49,7 @@ void traiter_ExposeEvent_mail(XExposeEvent xee);
 
 void initialiser_champs(void);
 void afficher_msg(char* msg);
+
+int numero_msg(Window w);
 
 #endif /*CLICABLE_POP_H*/

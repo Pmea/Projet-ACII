@@ -374,7 +374,7 @@ void traiter_ButtonPress_sur_mail(XButtonEvent xbe){
 		if(mails_fen[i] ==  xbe.window && recup_mail[i] == false){
 			//recuperer email
 			recup_mail[i]=true;
-			retr_handler(i+1);
+			retr_handler(i+1, NULL);
 		}
 	}
 	expose_mail();
@@ -403,4 +403,13 @@ void afficher_msg(char* msg){
 	strncpy(msg_erreur, msg, MAX_LENGTH);
 	printf("msg %s\n", msg_erreur);
 	change_focus_attibute(main_fen);
+}
+
+
+int numero_msg(Window w){
+	int i;
+	for(i=0; i<nb_mails; i++)
+		if( mails_fen[i] == w)
+			return i+1;
+	return -1;
 }
