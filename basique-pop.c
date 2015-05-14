@@ -202,7 +202,10 @@ bool annalyser_Entete(regex_t r, char* ext, char* boundary){
 const char* regex_content_type= "^(Content-[tT]ype:)[[:space:]]+([A-Za-z0-9~+.:/-]+)(.+boundary=\"(.*)\")?";
 
 // TODO ne pas compiler la regexp a chaque fois 
-void retr_handler(int id_msg){
+void retr_handler(int id_msg, char * sortie){
+	if(sortie != NULL)
+		sortie[0]='\0';
+
 	char buff_req[64];
 	sprintf(buff_req, "RETR %d\r\n", id_msg);
 
@@ -290,6 +293,9 @@ void retr_handler(int id_msg){
 		while(strcmp(fgets(buff_ans, 128, fsock), ".\r\n")!=0){
 			printf("%s",buff_ans);
 			fprintf(out, "%s", buff_ans);
+			if(sortie != NULL){
+				strcat(sortie, buff_ans);
+			}
 
 		}
 		printf("%s", buff_ans);

@@ -11,7 +11,7 @@ bool pass_handler(char* arg);
 
 int list_handler(void);
 
-void retr_handler(int id_msg);
+void retr_handler(int id_msg, char* sortie );
 bool top_handler(int id_msg, int nb_ligne, char* sortie);
 
 #endif /*TEXTUELPOP_H*/
