@@ -161,7 +161,7 @@ void init_mail_win_graphique(int num_msg){
 	}
 
 	free(contenu_mail);
-	height_contenu_inter= nb_ligne * (height_ligne + BORDER)
+	height_contenu_inter= nb_ligne * (height_ligne + BORDER);
 
 	//printf("traité\n|%s|\n", contenu_mail_traiter);
 	printf("nb_ligne %d height %d\n", nb_ligne, nb_ligne * (height_ligne + BORDER));
@@ -204,6 +204,8 @@ void init_mail_win_graphique(int num_msg){
 
 	XSelectInput(dpy, quit_button,  ButtonPressMask | ExposureMask);
 	XSelectInput(dpy, mail_contenu_inter,  ExposureMask);
+	XSelectInput(dpy, slider, PointerMotionMask |  ButtonReleaseMask | ButtonPressMask | ExposureMask);
+
 
 	XMapWindow(dpy, mail_fen);
 	XMapSubwindows(dpy, mail_fen);
@@ -222,14 +224,23 @@ void destroy_mail_win_graphique(void){
 	XDestroyWindow(dpy,  quit_button);
 	XDestroyWindow(dpy,  slider);
 	XDestroyWindow(dpy,  slide_fond);
-		XDestroyWindow(dpy, mail_fen);
+	XDestroyWindow(dpy, mail_fen);
 
 
 	XFreeGC(dpy, gc_glob);
 	XFreeFont(dpy, font);
 }
 
-void traiter_ButtonPress_sur_mail_graphique(XButtonEvent  xbe){
+void traiter_ButtonRelease_sur_mail_graphique(XButtonEvent  xbe){
+	if(xbe.window == slider){
+		printf("SLIDER unclic\n");
+		return;
+	}
+}
+
+int posslider;
+
+void traiter_ButtonPress_sur_mail_graphique(XButtonEvent  xbe){	// besoin de regarder la fenetre !! main ou l'autre 
 	printf("buttonPress event\n");
 	if(xbe.window == quit_button){
 		printf("Quit fenetre\n");
@@ -237,6 +248,36 @@ void traiter_ButtonPress_sur_mail_graphique(XButtonEvent  xbe){
 		return;
 	}
 
+	if(xbe.window == slider){
+		printf("SLIDER clic\n");
+		XEvent tmp;
+
+		int pos= xbe.y_root;
+		while(tmp.type != ButtonRelease){
+			printf("BOUCLE\n");
+			if(tmp.type == MotionNotify){
+				// if dans les bornes
+				int diff= pos - tmp.xmotion.y_root;
+				pos= tmp.xmotion.y_root;
+
+				XMoveWindow(dpy, slider, 0, -1 * (posslider + diff) );
+				posslider+= diff;
+
+				/*if(tmp.xmotion.x >= 0 && tmp.xmotion.x < WIDTH_FOND_SLIDE){
+					if(tmp.xmotion.y >= 0 && tmp.xmotion.y < HEIGHT_MAIL_CONTENU ){
+						printf("%d:%d\n", tmp.xmotion.x, tmp.xmotion.y);
+						printf("%d\n", oldposy-tmp.xmotion.y);
+						printf("%d\n", oldposslider);
+						XMoveWindow(dpy, slider, 0, -1* oldposslider );
+						oldposslider+= (oldposy-tmp.xmotion.y);
+						oldposy= tmp.xmotion.y;
+					}
+				}*/
+			}
+			XNextEvent(dpy, &tmp);
+		}
+		return;
+	}
 	// if pas deja dans la liste
 	int tmp= numero_msg(xbe.window);
 	if( tmp == -1){
@@ -288,6 +329,17 @@ void traiter_event_mails_graphique(XEvent e){
 	}
 	if(e.type == ButtonPress){
 		traiter_ButtonPress_sur_mail_graphique(e.xbutton);
+		printf("FIN EVENT\n");
+		return;
+	}
+
+	if(e.type == ButtonRelease){
+		traiter_ButtonRelease_sur_mail_graphique(e.xbutton);
+		return;
+	}
+
+	if(e.type == MotionNotify){
+		//il faudrait faire un traitant
 		return;
 	}
 	printf("PAS RECONNU EVENT \n");
