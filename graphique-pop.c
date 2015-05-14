@@ -2,7 +2,7 @@
 #include "cliquable-pop.h"
 
 #define WIDTH_MAIL_WIN 600
-#define HEIGHT_MAIL_WIN 800
+#define HEIGHT_MAIL_WIN 200
 
 #define WIDTH_BUTTON 75
 #define HEIGHT_BUTTON 20
@@ -19,18 +19,30 @@
 #define BORDER 2
 #define MARGIN 10
 
-
 XColor color_fond;
 XColor color_focus;
 XColor color_fond_de_fen;
 
+XFontStruct* font;
+
+
 // a mettre dans une structure 
 Window mail_fen;
 Window mail_contenu_fen;
+Window mail_contenu_inter;
 Window quit_button;
 Window slide_fond;
 Window slider;
 GC gc_glob;
+
+char* contenu_mail_traiter;
+int height_ligne;
+
+
+bool est_present(void){		// va tester si la fenetre est deja presente
+	return true;		
+}
+
 
 void init_mail_win_graphique(int num_msg){
 
@@ -51,6 +63,115 @@ void init_mail_win_graphique(int num_msg){
 					       BORDER/2, 
 					       BlackPixel(dpy,DefaultScreen(dpy)),
 					       WhitePixel(dpy,DefaultScreen(dpy)));
+
+
+	if ((font=XLoadQueryFont(dpy,"fixed"))==NULL){
+	 	fprintf(stderr," Sorry, having font problems.\n");
+	    exit(-1);
+	}
+
+	// faire la requete 
+	char * contenu_mail= (char*) malloc(sizeof(char) * 4096);
+	retr_handler(num_msg, contenu_mail);
+	//printf("contenu_mail:%s\n", contenu_mail );
+
+	int font_direction, font_ascent, font_descent;
+	XCharStruct text_structure;
+	char string_etal[]= "lj";
+	XTextExtents(font, string_etal, strlen(string_etal),
+	             &font_direction, &font_ascent, &font_descent,
+	             &text_structure);
+
+	int width_max= WIDTH_MAIL_CONTENU;
+	int width_tmp=0;
+	int nb_ligne=0;
+
+	height_ligne=font_descent + font_ascent;
+	printf("height_ligne: %d\n", height_ligne );
+
+	// traiter le text
+	contenu_mail_traiter= (char*) malloc(sizeof(char) * 4096);
+	contenu_mail_traiter[0]='\0';
+	char* line;
+	int cmpt_total=0;
+
+	for(line= strtok(contenu_mail, "\n") ; line != NULL; line= strtok(NULL, "\n")){
+		nb_ligne++;
+		width_tmp=0;
+
+		//printf("line: %s\n", line);
+
+		char* debutmot=line;
+		int cmpt=0;
+		int debut=0;
+
+		while(debutmot[cmpt] != '\n' && debutmot[cmpt] != '\0' ){
+			if(debutmot[cmpt] == '\r' ){
+				debutmot[cmpt] = ' ';
+			}
+			else{
+				if(debutmot[cmpt] == ' ' ){
+					XTextExtents(font, debutmot+debut, cmpt-debut+1, &font_direction, &font_ascent,  &font_descent, &text_structure);
+					if(width_tmp + text_structure.width> width_max){
+						// inserer un retour a la ligne 
+						strcat(contenu_mail_traiter, "\n");
+						width_tmp=0;
+						//printf("NOUVELLE LIGNE\n");
+						nb_ligne++;
+					}
+					else{
+						width_tmp+= text_structure.width;
+					}	
+					//printf("width:%d\n", width_tmp);
+
+					char* coincoin= strndup( debutmot+debut, cmpt-debut+1);
+					printf("MOT: |%s|\n", coincoin);
+					/*if(debutmot[cmpt+1] == '\r'){
+						printf("ICI\n");
+					}*/
+					strncat(contenu_mail_traiter, debutmot+debut, cmpt-debut+1);
+
+					debut+=(cmpt-debut+1);
+				}
+			}
+			cmpt++;
+		}
+		if(cmpt-debut > 1){
+			XTextExtents(font, debutmot+debut, cmpt-debut+1, &font_direction, &font_ascent,  &font_descent, &text_structure);
+			if(width_tmp + text_structure.width> width_max){
+				// inserer un retour a la ligne 
+				strcat(contenu_mail_traiter, "\n");
+				width_tmp=0;
+				//printf("NOUVELLE LIGNE\n");
+				nb_ligne++;
+			}
+			else{
+				width_tmp+= text_structure.width;
+			}	
+			//printf("width:%d\n", width_tmp);
+
+			char* coincoin= strndup( debutmot+debut, cmpt-debut-1);
+			//printf("MOT: |%s|\n", coincoin);
+			strncat(contenu_mail_traiter, debutmot+debut, cmpt-debut);
+			debut+=(cmpt-debut+1);
+			cmpt++;
+		}
+		strcat(contenu_mail_traiter, "\n");
+		cmpt_total+= cmpt;
+	}
+
+	free(contenu_mail);
+
+	//printf("traité\n|%s|\n", contenu_mail_traiter);
+	printf("nb_ligne %d height %d\n", nb_ligne, nb_ligne * (height_ligne + BORDER));
+	// faire une fenetre adapté 
+	mail_contenu_inter= XCreateSimpleWindow(dpy, mail_contenu_fen, 0, 0,
+					       WIDTH_MAIL_CONTENU,
+					       nb_ligne * (height_ligne + BORDER),
+					       0, 
+					       BlackPixel(dpy,DefaultScreen(dpy)),
+					       WhitePixel(dpy,DefaultScreen(dpy)));
+
 
 	quit_button=  XCreateSimpleWindow(dpy, mail_fen, MARGIN, HEIGHT_MAIL_WIN  -MARGIN - HEIGHT_BUTTON,
 					       WIDTH_BUTTON,
@@ -81,9 +202,12 @@ void init_mail_win_graphique(int num_msg){
 
 
 	XSelectInput(dpy, quit_button,  ButtonPressMask | ExposureMask);
+	XSelectInput(dpy, mail_contenu_inter,  ExposureMask);
 
 	XMapWindow(dpy, mail_fen);
 	XMapSubwindows(dpy, mail_fen);
+	XMapWindow(dpy, mail_contenu_fen);
+	XMapSubwindows(dpy, mail_contenu_fen);
 	XMapWindow(dpy, slide_fond);
 	XMapSubwindows(dpy, slide_fond);
 
@@ -91,26 +215,59 @@ void init_mail_win_graphique(int num_msg){
 }
 
 void destroy_mail_win_graphique(void){
-	
+
+	XDestroyWindow(dpy, mail_fen);
+	XDestroyWindow(dpy, mail_contenu_fen);
+	XDestroyWindow(dpy,  mail_contenu_inter);
+	XDestroyWindow(dpy,  quit_button);
+	XDestroyWindow(dpy,  slide_fond);
+	XDestroyWindow(dpy,  slider);
+
+	XFreeGC(dpy, gc_glob);
+	XFreeFont(dpy, font);
 }
 
 void traiter_ButtonPress_sur_mail_graphique(XButtonEvent  xbe){
 	printf("buttonPress event\n");
 	if(xbe.window == quit_button){
-		printf("Quit\n");
-		quit_cliquable=true;
+		printf("Quit fenetre\n");
+		destroy_mail_win_graphique();
 		return;
 	}
 
 	// if pas deja dans la liste
-	init_mail_win_graphique(0);
+	int tmp= numero_msg(xbe.window);
+	if( tmp == -1){
+		printf("Erreur lors de la recherche du numero de message\n");
+		exit(EXIT_FAILURE);
+	}
+	init_mail_win_graphique(tmp);
 }
 
 
 void expose_graphique(Window win){
 	//chercher la fenetre qui a recu le expose
 	XDrawString(dpy, quit_button, gc_glob, MARGIN/2, MARGIN*3/2, "Quit", strlen("Quit"));
-
+	//rechercher dans la liste des fenetres
+	
+	if(contenu_mail_traiter != NULL){
+		int i=0;
+		int line=0;
+		int j;
+		while(contenu_mail_traiter[i] != '\0'){
+			j=0;
+			line++;
+			while(contenu_mail_traiter[i+j] != '\n'){
+				j++;
+			}
+			XDrawString(dpy, mail_contenu_inter, gc_glob, 5, line*(height_ligne+ BORDER), contenu_mail_traiter+i, j);
+			i+=j;
+			i++;
+		}
+	}
+	else{
+		printf("NULL\n");
+	}
 }
 
 void traiter_ExposeEvent_mail_graphique(XExposeEvent xee){
