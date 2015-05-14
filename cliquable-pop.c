@@ -26,7 +26,6 @@ Window main_fen;
 Window log_user_fen;
 Window log_pass_fen;
 
-Window quit_button;
 Window connect_button;
 
 Window pop_fen;
@@ -35,14 +34,14 @@ char mails_text[N][1024];
 int nb_mails;
 bool recup_mail[N];
 
-XFontStruct *font;
+XFontStruct *font_general;
 
 XColor color_fond;
 XColor color_focus;
 XColor color_fond_de_fen;
 
 
-GC gc_glob;
+GC gc_glob_general;
 
 Cursor fleche, clic;
 
@@ -70,28 +69,28 @@ bool init_main_win(){
 					       BlackPixel(dpy,DefaultScreen(dpy)),
 					       color_fond_de_fen.pixel);
 
-  	quit_button=  XCreateSimpleWindow(dpy, main_fen, MARGIN, HEIGHT_MAIN  -MARGIN - HEIGHT_BUTTON,
+  	quit_general=  XCreateSimpleWindow(dpy, main_fen, MARGIN, HEIGHT_MAIN  -MARGIN - HEIGHT_BUTTON,
 					       WIDTH_BUTTON,
 					       HEIGHT_BUTTON,
 					       BORDER, 
 					       BlackPixel(dpy,DefaultScreen(dpy)),
 					       color_fond.pixel);
 
-	if ((font=XLoadQueryFont(dpy,"fixed"))==NULL){
+	if ((font_general=XLoadQueryFont(dpy,"fixed"))==NULL){
 	 	fprintf(stderr," Sorry, having font problems.\n");
 	    exit(-1);
 	}
 
-	gc_glob=XCreateGC(dpy,main_fen,0,NULL);
- 	XSetFont(dpy,gc_glob,font->fid);
- 	XSetForeground(dpy,gc_glob,BlackPixel(dpy,DefaultScreen(dpy)));
- 	XSetBackground(dpy,gc_glob,WhitePixel(dpy,DefaultScreen(dpy))); 
+	gc_glob_general=XCreateGC(dpy,main_fen,0,NULL);
+ 	XSetFont(dpy,gc_glob_general,font_general->fid);
+ 	XSetForeground(dpy,gc_glob_general,BlackPixel(dpy,DefaultScreen(dpy)));
+ 	XSetBackground(dpy,gc_glob_general,WhitePixel(dpy,DefaultScreen(dpy))); 
 
  	clic= XCreateFontCursor(dpy, CODE_CURS_XC_draft_large);
-	XDefineCursor(dpy, quit_button, clic);
+	XDefineCursor(dpy, quit_general, clic);
 
 	XSelectInput(dpy, main_fen, KeyPressMask | ExposureMask);
-	XSelectInput(dpy, quit_button,  ButtonPressMask | ExposureMask);
+	XSelectInput(dpy, quit_general,  ButtonPressMask | ExposureMask);
 
 	XMapWindow(dpy, main_fen);
   	XMapSubwindows(dpy, main_fen);
@@ -165,7 +164,7 @@ bool init_pop_win(int nb_mail, char ** top_mails){
 		strncpy(mails_text[i], top_mails[i], 1024);
 		XMapWindow(dpy, mails_fen[i]);
 
-		XDrawString(dpy, mails_fen[i], gc_glob, MARGIN/2, MARGIN*3/2, mails_text[i], strlen(mails_text[i]));
+		XDrawString(dpy, mails_fen[i], gc_glob_general, MARGIN/2, MARGIN*3/2, mails_text[i], strlen(mails_text[i]));
 	}
 	
 	return true;
@@ -178,8 +177,8 @@ bool detruire_main_win(){
 	//XFreeColors(dpy, DefaultScreen(dpy), color_fond.pixel, 1);
 	//XFreeColors(dpy, DefaultScreen(dpy), color_focus.pixel, 1);
 	//XFreeColors(dpy, DefaultScreen(dpy), color_fond_de_fen.pixel, 1);
-	XFreeGC(dpy, gc_glob);
-	XFreeFont(dpy, font);
+	XFreeGC(dpy, gc_glob_general);
+	XFreeFont(dpy, font_general);
 	XCloseDisplay(dpy);
 	return true;
 }
@@ -196,11 +195,11 @@ bool detruire_pop_win(){
 
 
 void expose(void){
-	XDrawString(dpy, log_user_fen, gc_glob, MARGIN/2, MARGIN*3/2, user_text, strlen(user_text));
-	XDrawString(dpy, log_pass_fen, gc_glob, MARGIN/2, MARGIN*3/2, pass_text, strlen(pass_text));
-	XDrawString(dpy, quit_button, gc_glob, MARGIN/2, MARGIN*3/2, "Quit", strlen("Quit"));
-	XDrawString(dpy, connect_button, gc_glob, MARGIN/2, MARGIN*3/2, "Connection", strlen("Connection"));
-	XDrawString(dpy, main_fen, gc_glob, MARGIN*2, MARGIN*5, msg_erreur, strlen(msg_erreur));
+	XDrawString(dpy, log_user_fen, gc_glob_general, MARGIN/2, MARGIN*3/2, user_text, strlen(user_text));
+	XDrawString(dpy, log_pass_fen, gc_glob_general, MARGIN/2, MARGIN*3/2, pass_text, strlen(pass_text));
+	XDrawString(dpy, quit_general, gc_glob_general, MARGIN/2, MARGIN*3/2, "Quit", strlen("Quit"));
+	XDrawString(dpy, connect_button, gc_glob_general, MARGIN/2, MARGIN*3/2, "Connection", strlen("Connection"));
+	XDrawString(dpy, main_fen, gc_glob_general, MARGIN*2, MARGIN*5, msg_erreur, strlen(msg_erreur));
 }
 
 void traiter_ExposeEvent(XExposeEvent xee){
@@ -240,7 +239,7 @@ void traiter_ButtonPressEvent(XButtonEvent xbp){
 		msg_erreur[0]='\0';
 	}
 
-	if(focus_fen == quit_button){
+	if(focus_fen == quit_general){
 		printf("Quit\n");
 		quit_cliquable=true;
 		return;
@@ -276,14 +275,14 @@ void traiter_KeyPressEvent(XKeyEvent xke){
 			if(focus_fen == log_user_fen){
 				if(strlen(user_text) > 0){
 					user_text[strlen(user_text) -1]= '\0';
-					XDrawString(dpy, log_user_fen, gc_glob, MARGIN/2, MARGIN*3/2, user_text, strlen(user_text));
+					XDrawString(dpy, log_user_fen, gc_glob_general, MARGIN/2, MARGIN*3/2, user_text, strlen(user_text));
 				}
 			}
 		
 			if(focus_fen == log_pass_fen){
 				if(strlen(pass_text) > 0){
 					pass_text[strlen(pass_text) -1]= '\0';
-					XDrawString(dpy, log_pass_fen, gc_glob, MARGIN/2, MARGIN*3/2, pass_text, strlen(pass_text));
+					XDrawString(dpy, log_pass_fen, gc_glob_general, MARGIN/2, MARGIN*3/2, pass_text, strlen(pass_text));
 				}
 			}
 	}
@@ -305,13 +304,13 @@ void traiter_KeyPressEvent(XKeyEvent xke){
 		if(focus_fen == log_user_fen){
 			if( strlen(user_text) < MAX_LENGTH){
 				sprintf(user_text, "%s%s", user_text, key);
-				XDrawString(dpy, log_user_fen, gc_glob, MARGIN/2, MARGIN*3/2, user_text, strlen(user_text));
+				XDrawString(dpy, log_user_fen, gc_glob_general, MARGIN/2, MARGIN*3/2, user_text, strlen(user_text));
 			}
 		}
 		if(focus_fen == log_pass_fen){
 			if( strlen(pass_text) < MAX_LENGTH){
 				sprintf(pass_text, "%s%s", pass_text, key);
-				XDrawString(dpy, log_pass_fen, gc_glob, MARGIN/2, MARGIN*3/2, pass_text, strlen(pass_text));		
+				XDrawString(dpy, log_pass_fen, gc_glob_general, MARGIN/2, MARGIN*3/2, pass_text, strlen(pass_text));		
 			}
 		}
 	}
@@ -346,8 +345,16 @@ void expose_mail(void){
 			XSetWindowBackground(dpy, mails_fen[i], color_focus.pixel);
 		XUnmapWindow(dpy, mails_fen[i]);
 		XMapWindow(dpy, mails_fen[i]);
-		XDrawString(dpy, mails_fen[i], gc_glob, MARGIN/2, MARGIN*3/2, mails_text[i], strlen(mails_text[i]));
+		XDrawString(dpy, mails_fen[i], gc_glob_general, MARGIN/2, MARGIN*3/2, mails_text[i], strlen(mails_text[i]));
 	}
+}
+
+void expose_mail_graphique(void){
+	int i;
+	for(i=0; i<nb_mails; i++){
+		XDrawString(dpy, mails_fen[i], gc_glob_general, MARGIN/2, MARGIN*3/2, mails_text[i], strlen(mails_text[i]));
+	}
+	XDrawString(dpy, quit_general, gc_glob_general, MARGIN/2, MARGIN*3/2, "Quit", strlen("Quit"));
 }
 
 void traiter_ExposeEvent_mail(XExposeEvent xee){
@@ -357,13 +364,13 @@ void traiter_ExposeEvent_mail(XExposeEvent xee){
 		printf("Last Expose Event\n");
 		int i;
 		for(i=0; i<nb_mails; i++){
-			XDrawString(dpy, mails_fen[i], gc_glob, MARGIN/2, MARGIN*3/2, mails_text[i], strlen(mails_text[i]));
+			XDrawString(dpy, mails_fen[i], gc_glob_general, MARGIN/2, MARGIN*3/2, mails_text[i], strlen(mails_text[i]));
 		}
 	}
 }
 
 void traiter_ButtonPress_sur_mail(XButtonEvent xbe){
-	if(xbe.window == quit_button){
+	if(xbe.window == quit_general){
 		printf("Quit\n");
 		quit_cliquable=true;
 		return;

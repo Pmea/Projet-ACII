@@ -209,6 +209,7 @@ int main_graphique(int argc, char* argv[]){
 			traiter_event_mails_graphique(event_mails);
 		}
 		detruire_pop_win();
+		// if liste vide alors faire destroy
 	}
 	printf("QUIT\n");
 	detruire_main_win();

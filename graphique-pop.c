@@ -27,18 +27,26 @@ XFontStruct* font;
 
 
 // a mettre dans une structure 
-Window mail_fen;
-Window mail_contenu_fen;
-Window mail_contenu_inter;
-Window quit_button;
-Window slide_fond;
-Window slider;
-GC gc_glob;
+//typedef struct {
+	int ip;
+	bool init_window;
 
-char* contenu_mail_traiter;
-int height_ligne;
-int height_contenu_inter;
-int posslider;
+	Window mail_fen;
+	Window mail_contenu_fen;
+	Window mail_contenu_inter;
+	Window quit_button;
+	Window slide_fond;
+	Window slider;
+	GC gc_glob;
+
+	char* contenu_mail_traiter;
+	int height_ligne;
+	int height_contenu_inter;
+	int posslider;
+
+//	mail* next;
+
+//} mail;
 
 
 bool est_present(void){		// va tester si la fenetre est deja presente
@@ -47,6 +55,7 @@ bool est_present(void){		// va tester si la fenetre est deja presente
 
 
 void init_mail_win_graphique(int num_msg){
+	init_window=true;
 
 	XAllocNamedColor(dpy, DefaultColormap(dpy, DefaultScreen(dpy)), "grey", &color_fond, &color_fond);
 	XAllocNamedColor(dpy, DefaultColormap(dpy, DefaultScreen(dpy)), "DimGrey", &color_focus, &color_focus);
@@ -220,6 +229,7 @@ void init_mail_win_graphique(int num_msg){
 }
 
 void destroy_mail_win_graphique(void){
+	init_window=false;
 
 	XDestroyWindow(dpy,  mail_contenu_inter);
 	XDestroyWindow(dpy, mail_contenu_fen);
@@ -242,7 +252,8 @@ void traiter_ButtonRelease_sur_mail_graphique(XButtonEvent  xbe){
 
 void expose_graphique(Window win){
 	//chercher la fenetre qui a recu le expose
-	XDrawString(dpy, quit_button, gc_glob, MARGIN/2, MARGIN*3/2, "Quit", strlen("Quit"));
+	if(init_window== true)
+		XDrawString(dpy, quit_button, gc_glob, MARGIN/2, MARGIN*3/2, "Quit", strlen("Quit"));
 	//rechercher dans la liste des fenetres
 	
 	if(contenu_mail_traiter != NULL){
@@ -265,6 +276,11 @@ void expose_graphique(Window win){
 
 void traiter_ButtonPress_sur_mail_graphique(XButtonEvent  xbe){	// besoin de regarder la fenetre !! main ou l'autre 
 	printf("buttonPress event\n");
+	if(xbe.window == quit_general){
+		quit_cliquable=true;
+		return;
+	}
+
 	if(xbe.window == quit_button){
 		printf("Quit fenetre\n");
 		destroy_mail_win_graphique();
@@ -287,11 +303,12 @@ void traiter_ButtonPress_sur_mail_graphique(XButtonEvent  xbe){	// besoin de reg
 				int diff= pos - tmp.xmotion.y_root;
 				pos= tmp.xmotion.y_root;
 
-				if(posslider+diff <= 0 && posslider+diff >= -1*(HEIGHT_MAIL_CONTENU- HEIGHT_SLIDER))
+				if(posslider+diff <= 0 && posslider+diff >= -1*(HEIGHT_MAIL_CONTENU- HEIGHT_SLIDER)){
 					XMoveWindow(dpy, slider, 0, -1 * (posslider + diff) );
-				posslider+= diff;
+					posslider+= diff;
+				}
 				if(posslider+diff <= 0 && posslider+diff >= -1*(HEIGHT_MAIL_CONTENU- HEIGHT_SLIDER))
-					XMoveWindow(dpy, mail_contenu_inter,0, ((posslider + diff)*height_contenu_inter) / HEIGHT_MAIL_CONTENU );
+				XMoveWindow(dpy, mail_contenu_inter,0, ((posslider + diff)*height_contenu_inter) / HEIGHT_MAIL_CONTENU );
 			}
 			XNextEvent(dpy, &tmp);
 		}
@@ -313,6 +330,7 @@ void traiter_ExposeEvent_mail_graphique(XExposeEvent xee){
 
 	if(xee.count == 0){
 		printf("Last Expose Event\n");
+		expose_mail_graphique();
 		expose_graphique(xee.window);
 	}
 }
