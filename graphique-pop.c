@@ -19,6 +19,8 @@
 #define BORDER 2
 #define MARGIN 10
 
+#define N 10 +1
+
 XColor color_fond;
 XColor color_focus;
 XColor color_fond_de_fen;
@@ -26,9 +28,8 @@ XColor color_fond_de_fen;
 XFontStruct* font;
 
 
-// a mettre dans une structure 
-//typedef struct {
-	int ip;
+typedef struct mail_t{
+	int num_du_msg;
 	bool init_window;
 
 	Window mail_fen;
@@ -44,42 +45,44 @@ XFontStruct* font;
 	int height_contenu_inter;
 	int posslider;
 
-//	mail* next;
+} mail;
 
-//} mail;
+mail tab_mails[N+1];
 
 
-bool est_present(void){		// va tester si la fenetre est deja presente
-	return true;		
+bool est_present(int id){
+	if(tab_mails[id].init_window == true)
+		return true;
+	return false;
 }
 
-
-void init_mail_win_graphique(int num_msg){
-	init_window=true;
-
+void init_graphique(void){
 	XAllocNamedColor(dpy, DefaultColormap(dpy, DefaultScreen(dpy)), "grey", &color_fond, &color_fond);
 	XAllocNamedColor(dpy, DefaultColormap(dpy, DefaultScreen(dpy)), "DimGrey", &color_focus, &color_focus);
 	XAllocNamedColor(dpy, DefaultColormap(dpy, DefaultScreen(dpy)), "WhiteSmoke", &color_fond_de_fen , &color_fond_de_fen );
 
-	mail_fen = XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0,
+	if ((font=XLoadQueryFont(dpy,"fixed"))==NULL){
+	 	fprintf(stderr," Sorry, having font problems.\n");
+	    exit(-1);
+	}
+}
+
+void init_mail_win_graphique(int num_msg){
+
+	tab_mails[num_msg].mail_fen = XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0,
 			    WIDTH_MAIL_WIN,
 				HEIGHT_MAIL_WIN,
 				BORDER, 
 				BlackPixel(dpy,DefaultScreen(dpy)), 
 				color_fond_de_fen.pixel);	
 
-	mail_contenu_fen= XCreateSimpleWindow(dpy, mail_fen, MARGIN, MARGIN,
+	tab_mails[num_msg].mail_contenu_fen= XCreateSimpleWindow(dpy, tab_mails[num_msg].mail_fen, MARGIN, MARGIN,
 					       WIDTH_MAIL_CONTENU,
 					       HEIGHT_MAIL_CONTENU,
 					       BORDER/2, 
 					       BlackPixel(dpy,DefaultScreen(dpy)),
 					       WhitePixel(dpy,DefaultScreen(dpy)));
 
-
-	if ((font=XLoadQueryFont(dpy,"fixed"))==NULL){
-	 	fprintf(stderr," Sorry, having font problems.\n");
-	    exit(-1);
-	}
 
 	// faire la requete 
 	char * contenu_mail= (char*) malloc(sizeof(char) * 4096);
@@ -97,12 +100,12 @@ void init_mail_win_graphique(int num_msg){
 	int width_tmp=0;
 	int nb_ligne=0;
 
-	height_ligne=font_descent + font_ascent;
-	printf("height_ligne: %d\n", height_ligne );
+	tab_mails[num_msg].height_ligne=font_descent + font_ascent;
+	printf("height_ligne: %d\n", tab_mails[num_msg].height_ligne );
 
 	// traiter le text
-	contenu_mail_traiter= (char*) malloc(sizeof(char) * 4096);
-	contenu_mail_traiter[0]='\0';
+	tab_mails[num_msg].contenu_mail_traiter= (char*) malloc(sizeof(char) * 4096);
+	tab_mails[num_msg].contenu_mail_traiter[0]='\0';
 	char* line;
 	int cmpt_total=0;
 
@@ -125,7 +128,7 @@ void init_mail_win_graphique(int num_msg){
 					XTextExtents(font, debutmot+debut, cmpt-debut+1, &font_direction, &font_ascent,  &font_descent, &text_structure);
 					if(width_tmp + text_structure.width> width_max){
 						// inserer un retour a la ligne 
-						strcat(contenu_mail_traiter, "\n");
+						strcat(tab_mails[num_msg].contenu_mail_traiter, "\n");
 						width_tmp=0;
 						//printf("NOUVELLE LIGNE\n");
 						nb_ligne++;
@@ -137,10 +140,8 @@ void init_mail_win_graphique(int num_msg){
 
 					//char* coincoin= strndup( debutmot+debut, cmpt-debut+1);
 					//printf("MOT: |%s|\n", coincoin);
-					/*if(debutmot[cmpt+1] == '\r'){
-						printf("ICI\n");
-					}*/
-					strncat(contenu_mail_traiter, debutmot+debut, cmpt-debut+1);
+					
+					strncat(tab_mails[num_msg].contenu_mail_traiter, debutmot+debut, cmpt-debut+1);
 
 					debut+=(cmpt-debut+1);
 				}
@@ -151,7 +152,7 @@ void init_mail_win_graphique(int num_msg){
 			XTextExtents(font, debutmot+debut, cmpt-debut+1, &font_direction, &font_ascent,  &font_descent, &text_structure);
 			if(width_tmp + text_structure.width> width_max){
 				// inserer un retour a la ligne 
-				strcat(contenu_mail_traiter, "\n");
+				strcat(tab_mails[num_msg].contenu_mail_traiter, "\n");
 				width_tmp=0;
 				//printf("NOUVELLE LIGNE\n");
 				nb_ligne++;
@@ -163,112 +164,133 @@ void init_mail_win_graphique(int num_msg){
 
 			//char* coincoin= strndup( debutmot+debut, cmpt-debut-1);
 			//printf("MOT: |%s|\n", coincoin);
-			strncat(contenu_mail_traiter, debutmot+debut, cmpt-debut);
+			strncat(tab_mails[num_msg].contenu_mail_traiter, debutmot+debut, cmpt-debut);
 			debut+=(cmpt-debut+1);
 			cmpt++;
 		}
-		strcat(contenu_mail_traiter, "\n");
+		strcat(tab_mails[num_msg].contenu_mail_traiter, "\n");
 		cmpt_total+= cmpt;
 	}
 
 	free(contenu_mail);
-	height_contenu_inter= nb_ligne * (height_ligne + BORDER);
+	tab_mails[num_msg].height_contenu_inter= nb_ligne * (tab_mails[num_msg].height_ligne + BORDER);
 
-	//printf("traité\n|%s|\n", contenu_mail_traiter);
-	printf("nb_ligne %d height %d\n", nb_ligne, nb_ligne * (height_ligne + BORDER));
+	printf("nb_ligne %d height %d\n", nb_ligne, nb_ligne * (tab_mails[num_msg].height_ligne + BORDER));
+	//printf("contenu_mail_traiter: %s\n", tab_mails[num_msg].contenu_mail_traiter);
 	// faire une fenetre adapté 
-	mail_contenu_inter= XCreateSimpleWindow(dpy, mail_contenu_fen, 0, 0,
+	tab_mails[num_msg].mail_contenu_inter= XCreateSimpleWindow(dpy, tab_mails[num_msg].mail_contenu_fen, 0, 0,
 					       WIDTH_MAIL_CONTENU,
-					       height_contenu_inter,
+					       tab_mails[num_msg].height_contenu_inter,
 					       0, 
 					       BlackPixel(dpy,DefaultScreen(dpy)),
 					       WhitePixel(dpy,DefaultScreen(dpy)));
 
 
-	quit_button=  XCreateSimpleWindow(dpy, mail_fen, MARGIN, HEIGHT_MAIL_WIN  -MARGIN - HEIGHT_BUTTON,
+	tab_mails[num_msg].quit_button=  XCreateSimpleWindow(dpy, tab_mails[num_msg].mail_fen, MARGIN, HEIGHT_MAIL_WIN  -MARGIN - HEIGHT_BUTTON,
 					       WIDTH_BUTTON,
 					       HEIGHT_BUTTON,
 					       BORDER, 
 					       BlackPixel(dpy,DefaultScreen(dpy)),
 					       color_fond.pixel);
 
-	slide_fond=  XCreateSimpleWindow(dpy, mail_fen, WIDTH_MAIL_WIN - MARGIN - WIDTH_FOND_SLIDE, MARGIN,
+	tab_mails[num_msg].slide_fond=  XCreateSimpleWindow(dpy, tab_mails[num_msg].mail_fen, WIDTH_MAIL_WIN - MARGIN - WIDTH_FOND_SLIDE, MARGIN,
 					       WIDTH_FOND_SLIDE,
 					       HEIGHT_MAIL_CONTENU,
 					       BORDER/2, 
 					       BlackPixel(dpy,DefaultScreen(dpy)),
 					       WhitePixel(dpy,DefaultScreen(dpy)));
 					       
-	slider=  XCreateSimpleWindow(dpy, slide_fond,  0, 0,
+	tab_mails[num_msg].slider=  XCreateSimpleWindow(dpy, tab_mails[num_msg].slide_fond,  0, 0,
 					       WIDTH_SLIDER,
 					       HEIGHT_SLIDER,
 					       0, 
 					       BlackPixel(dpy,DefaultScreen(dpy)),
 					       color_focus.pixel);
-	posslider=0;			       
+	tab_mails[num_msg].posslider=0;			       
 
-	// test pour garder le gc 
-	gc_glob=XCreateGC(dpy,mail_fen,0,NULL);
- 	XSetForeground(dpy,gc_glob,BlackPixel(dpy,DefaultScreen(dpy)));
- 	XSetBackground(dpy,gc_glob,color_fond.pixel); 
-
-
-	XSelectInput(dpy, quit_button,  ButtonPressMask | ExposureMask);
-	XSelectInput(dpy, mail_contenu_inter,  ExposureMask);
-	XSelectInput(dpy, slider, PointerMotionMask |  ButtonReleaseMask | ButtonPressMask | ExposureMask);
+	tab_mails[num_msg].gc_glob=XCreateGC(dpy, tab_mails[num_msg].mail_fen, 0, NULL);
+ 	XSetForeground(dpy, tab_mails[num_msg].gc_glob, BlackPixel(dpy,DefaultScreen(dpy)));
+ 	XSetBackground(dpy, tab_mails[num_msg].gc_glob, color_fond.pixel); 
 
 
-	XMapWindow(dpy, mail_fen);
-	XMapSubwindows(dpy, mail_fen);
-	XMapWindow(dpy, mail_contenu_fen);
-	XMapSubwindows(dpy, mail_contenu_fen);
-	XMapWindow(dpy, slide_fond);
-	XMapSubwindows(dpy, slide_fond);
+	XSelectInput(dpy, tab_mails[num_msg].quit_button,  ButtonPressMask | ExposureMask);
+	XSelectInput(dpy, tab_mails[num_msg].mail_contenu_inter, ExposureMask);
+	XSelectInput(dpy, tab_mails[num_msg].slider, PointerMotionMask |  ButtonReleaseMask | ButtonPressMask | ExposureMask);
+
+
+	XMapWindow(dpy, tab_mails[num_msg].mail_fen);
+	XMapSubwindows(dpy, tab_mails[num_msg].mail_fen);
+	XMapWindow(dpy, tab_mails[num_msg].mail_contenu_fen);
+	XMapSubwindows(dpy, tab_mails[num_msg].mail_contenu_fen);
+	XMapWindow(dpy, tab_mails[num_msg].slide_fond);
+	XMapSubwindows(dpy, tab_mails[num_msg].slide_fond);
 
 	XFlush(dpy);
+
+	tab_mails[num_msg].init_window=true;
+	printf("FIN DE L'INIT\n");
 }
 
-void destroy_mail_win_graphique(void){
-	init_window=false;
 
-	XDestroyWindow(dpy,  mail_contenu_inter);
-	XDestroyWindow(dpy, mail_contenu_fen);
-	XDestroyWindow(dpy,  quit_button);
-	XDestroyWindow(dpy,  slider);
-	XDestroyWindow(dpy,  slide_fond);
-	XDestroyWindow(dpy, mail_fen);
-
-
-	XFreeGC(dpy, gc_glob);
+void destroy_graphique(void){
 	XFreeFont(dpy, font);
 }
 
+void destroy_mail_win_graphique(int num_msg){
+	tab_mails[num_msg].init_window=false;
+
+	XDestroyWindow(dpy,  tab_mails[num_msg].mail_contenu_inter);
+	XDestroyWindow(dpy, tab_mails[num_msg].mail_contenu_fen);
+	XDestroyWindow(dpy,  tab_mails[num_msg].quit_button);
+	XDestroyWindow(dpy,  tab_mails[num_msg].slider);
+	XDestroyWindow(dpy,  tab_mails[num_msg].slide_fond);
+	XDestroyWindow(dpy, tab_mails[num_msg].mail_fen);
+	XFreeGC(dpy,tab_mails[num_msg].gc_glob);
+
+}
+
+
 void traiter_ButtonRelease_sur_mail_graphique(XButtonEvent  xbe){
-	if(xbe.window == slider){
-		printf("SLIDER unclic\n");
-		return;
+	int i;
+	for(i=0; i<N; i++){
+		if(tab_mails[i].init_window == true){	
+			if(xbe.window == tab_mails[i].slider){
+				printf("SLIDER unclic\n");
+				return;
+			}
+		}
 	}
 }
 
+
+// voir si il n'y a pas d'amelioration 
 void expose_graphique(Window win){
-	//chercher la fenetre qui a recu le expose
-	if(init_window== true)
-		XDrawString(dpy, quit_button, gc_glob, MARGIN/2, MARGIN*3/2, "Quit", strlen("Quit"));
-	//rechercher dans la liste des fenetres
-	
-	if(contenu_mail_traiter != NULL){
-		int i=0;
-		int line=0;
-		int j;
-		while(contenu_mail_traiter[i] != '\0'){
-			j=0;
-			line++;
-			while(contenu_mail_traiter[i+j] != '\n'){
-				j++;
+	int k;
+	for(k=0; k<N; k++){
+		if(tab_mails[k].init_window == true){
+			printf("%d: init\n", k);
+			XDrawString(dpy, tab_mails[k].quit_button, tab_mails[k].gc_glob, MARGIN/2, MARGIN*3/2, "Quit", strlen("Quit"));
+			
+			if(tab_mails[k].contenu_mail_traiter != NULL){
+				int i=0;
+				int line=0;
+				int j;
+
+				while(tab_mails[k].contenu_mail_traiter[i] != '\0'){
+					j=0;
+					line++;
+					while(tab_mails[k].contenu_mail_traiter[i+j] != '\n'){
+						j++;
+					}
+
+					char* coincoin= strndup( tab_mails[k].contenu_mail_traiter+i, j);
+					printf("MOT: |%s|\n", coincoin);
+
+					XDrawString(dpy, tab_mails[k].mail_contenu_inter, tab_mails[k].gc_glob, 5, line*(tab_mails[k].height_ligne+ BORDER), tab_mails[k].contenu_mail_traiter+i, j);
+					i+=j;
+					i++;
+				}
 			}
-			XDrawString(dpy, mail_contenu_inter, gc_glob, 5, line*(height_ligne+ BORDER), contenu_mail_traiter+i, j);
-			i+=j;
-			i++;
 		}
 	}
 }
@@ -281,48 +303,56 @@ void traiter_ButtonPress_sur_mail_graphique(XButtonEvent  xbe){	// besoin de reg
 		return;
 	}
 
-	if(xbe.window == quit_button){
-		printf("Quit fenetre\n");
-		destroy_mail_win_graphique();
-		return;
-	}
-
-	if(xbe.window == slider){
-		printf("SLIDER clic\n");
-		XEvent tmp;
-		XNextEvent(dpy, &tmp);
-
-		int pos= xbe.y_root;
-		while(tmp.type != ButtonRelease){
-			printf("BOUCLE\n");
-			if(tmp.type == Expose){
-				expose_graphique(slider);
-			}
-
-			if(tmp.type == MotionNotify){
-				int diff= pos - tmp.xmotion.y_root;
-				pos= tmp.xmotion.y_root;
-
-				if(posslider+diff <= 0 && posslider+diff >= -1*(HEIGHT_MAIL_CONTENU- HEIGHT_SLIDER)){
-					XMoveWindow(dpy, slider, 0, -1 * (posslider + diff) );
-					posslider+= diff;
-				}
-				if(posslider+diff <= 0 && posslider+diff >= -1*(HEIGHT_MAIL_CONTENU- HEIGHT_SLIDER))
-				XMoveWindow(dpy, mail_contenu_inter,0, ((posslider + diff)*height_contenu_inter) / HEIGHT_MAIL_CONTENU );
-			}
-			XNextEvent(dpy, &tmp);
+	int i;
+	for(i=0; i< N; i++){
+		if(xbe.window == tab_mails[i].quit_button){
+			printf("Quit fenetre\n");
+			destroy_mail_win_graphique(i);
+			return;
 		}
-		return;
 	}
-	// if pas deja dans la liste
+	
+	for(i=0; i<N; i++){
+		if(xbe.window == tab_mails[i].slider){
+			printf("SLIDER clic\n");
+			XEvent tmp;
+			XNextEvent(dpy, &tmp);
+
+			int pos= xbe.y_root;
+			while(tmp.type != ButtonRelease){
+				printf("BOUCLE\n");
+				if(tmp.type == Expose){
+					expose_graphique(tab_mails[i].slider);
+				}
+
+				if(tmp.type == MotionNotify){
+					int diff= pos - tmp.xmotion.y_root;
+					pos= tmp.xmotion.y_root;
+
+					if(tab_mails[i].posslider+diff <= 0 && tab_mails[i].posslider+diff >= -1*(HEIGHT_MAIL_CONTENU- HEIGHT_SLIDER)){
+						XMoveWindow(dpy, tab_mails[i].slider, 0, -1 * (tab_mails[i].posslider + diff) );
+						tab_mails[i].posslider+= diff;
+					}
+					if(tab_mails[i].posslider+diff <= 0 && tab_mails[i].posslider+diff >= -1*(HEIGHT_MAIL_CONTENU- HEIGHT_SLIDER))
+					XMoveWindow(dpy, tab_mails[i].mail_contenu_inter,0, ((tab_mails[i].posslider + diff)*tab_mails[i].height_contenu_inter) / HEIGHT_MAIL_CONTENU );
+				}
+				XNextEvent(dpy, &tmp);
+			}
+			return;
+		}
+	}
+
+	// corriger bug 
 	int tmp= numero_msg(xbe.window);
 	if( tmp == -1){
 		printf("Erreur lors de la recherche du numero de message\n");
 		exit(EXIT_FAILURE);
 	}
-	init_mail_win_graphique(tmp);
+	if(est_present(tmp)== false){
+		init_mail_win_graphique(tmp);
+	}
+	
 }
-
 
 
 void traiter_ExposeEvent_mail_graphique(XExposeEvent xee){
@@ -357,3 +387,4 @@ void traiter_event_mails_graphique(XEvent e){
 	}
 	printf("PAS RECONNU EVENT \n");
 }
+

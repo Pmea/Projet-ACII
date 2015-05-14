@@ -17,4 +17,7 @@
 
 void traiter_event_mails_graphique(XEvent event_mails);
 
+void init_graphique(void);
+void destroy_graphique(void);
+
 #endif /*GRAPHIQUEPOP_H*/
