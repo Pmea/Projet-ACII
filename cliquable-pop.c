@@ -166,6 +166,15 @@ bool init_pop_win(int nb_mail, char ** top_mails){
 
 		XDrawString(dpy, mails_fen[i], gc_glob_general, MARGIN/2, MARGIN*3/2, mails_text[i], strlen(mails_text[i]));
 	}
+	for(i=nb_mail; i<N; i++){
+		mails_fen[i]=  XCreateSimpleWindow(dpy, pop_fen, -BORDER, -BORDER + HEIGHT_LOG * i,
+					       WIDTH_MAIL,
+					       HEIGHT_MAIL,
+					       BORDER, 
+					       BlackPixel(dpy,DefaultScreen(dpy)),
+					       color_fond.pixel);
+		XMapWindow(dpy, mails_fen[i]);
+	}
 	
 	return true;
 }
@@ -360,7 +369,6 @@ void traiter_ExposeEvent_mail(XExposeEvent xee){
 
 void traiter_ButtonPress_sur_mail(XButtonEvent xbe){
 	if(xbe.window == quit_general){
-		printf("Quit\n");
 		quit_cliquable=true;
 		return;
 	}
