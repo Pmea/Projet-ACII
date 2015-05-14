@@ -38,6 +38,8 @@ GC gc_glob;
 char* contenu_mail_traiter;
 int height_ligne;
 int height_contenu_inter;
+int posslider;
+
 
 bool est_present(void){		// va tester si la fenetre est deja presente
 	return true;		
@@ -194,7 +196,7 @@ void init_mail_win_graphique(int num_msg){
 					       0, 
 					       BlackPixel(dpy,DefaultScreen(dpy)),
 					       color_focus.pixel);
-					       
+	posslider=0;			       
 
 	// test pour garder le gc 
 	gc_glob=XCreateGC(dpy,mail_fen,0,NULL);
@@ -238,7 +240,6 @@ void traiter_ButtonRelease_sur_mail_graphique(XButtonEvent  xbe){
 	}
 }
 
-int posslider;
 
 void traiter_ButtonPress_sur_mail_graphique(XButtonEvent  xbe){	// besoin de regarder la fenetre !! main ou l'autre 
 	printf("buttonPress event\n");
@@ -251,28 +252,20 @@ void traiter_ButtonPress_sur_mail_graphique(XButtonEvent  xbe){	// besoin de reg
 	if(xbe.window == slider){
 		printf("SLIDER clic\n");
 		XEvent tmp;
+			XNextEvent(dpy, &tmp);
 
 		int pos= xbe.y_root;
 		while(tmp.type != ButtonRelease){
 			printf("BOUCLE\n");
 			if(tmp.type == MotionNotify){
 				// if dans les bornes
+
 				int diff= pos - tmp.xmotion.y_root;
 				pos= tmp.xmotion.y_root;
 
+				if(posslider+diff <= 0 && posslider+diff >= -1*(HEIGHT_MAIL_CONTENU- HEIGHT_SLIDER))
 				XMoveWindow(dpy, slider, 0, -1 * (posslider + diff) );
 				posslider+= diff;
-
-				/*if(tmp.xmotion.x >= 0 && tmp.xmotion.x < WIDTH_FOND_SLIDE){
-					if(tmp.xmotion.y >= 0 && tmp.xmotion.y < HEIGHT_MAIL_CONTENU ){
-						printf("%d:%d\n", tmp.xmotion.x, tmp.xmotion.y);
-						printf("%d\n", oldposy-tmp.xmotion.y);
-						printf("%d\n", oldposslider);
-						XMoveWindow(dpy, slider, 0, -1* oldposslider );
-						oldposslider+= (oldposy-tmp.xmotion.y);
-						oldposy= tmp.xmotion.y;
-					}
-				}*/
 			}
 			XNextEvent(dpy, &tmp);
 		}
