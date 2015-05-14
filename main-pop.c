@@ -203,6 +203,7 @@ int main_graphique(int argc, char* argv[]){
 		printf("FREE TOPTOTAL\n");
 		free(top_tab);
 
+		init_graphique();
 		XEvent event_mails;
 		while(quit_cliquable == false){
 			XNextEvent(dpy, &event_mails);
@@ -213,6 +214,8 @@ int main_graphique(int argc, char* argv[]){
 	}
 	printf("QUIT\n");
 	detruire_main_win();
+	destroy_graphique();
+
 
 	if(close_connexion() == false){
 		printf("Error close connexion\n");
