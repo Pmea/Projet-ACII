@@ -37,7 +37,7 @@ GC gc_glob;
 
 char* contenu_mail_traiter;
 int height_ligne;
-
+int height_contenu_inter;
 
 bool est_present(void){		// va tester si la fenetre est deja presente
 	return true;		
@@ -124,8 +124,8 @@ void init_mail_win_graphique(int num_msg){
 					}	
 					//printf("width:%d\n", width_tmp);
 
-					char* coincoin= strndup( debutmot+debut, cmpt-debut+1);
-					printf("MOT: |%s|\n", coincoin);
+					//char* coincoin= strndup( debutmot+debut, cmpt-debut+1);
+					//printf("MOT: |%s|\n", coincoin);
 					/*if(debutmot[cmpt+1] == '\r'){
 						printf("ICI\n");
 					}*/
@@ -150,7 +150,7 @@ void init_mail_win_graphique(int num_msg){
 			}	
 			//printf("width:%d\n", width_tmp);
 
-			char* coincoin= strndup( debutmot+debut, cmpt-debut-1);
+			//char* coincoin= strndup( debutmot+debut, cmpt-debut-1);
 			//printf("MOT: |%s|\n", coincoin);
 			strncat(contenu_mail_traiter, debutmot+debut, cmpt-debut);
 			debut+=(cmpt-debut+1);
@@ -161,13 +161,14 @@ void init_mail_win_graphique(int num_msg){
 	}
 
 	free(contenu_mail);
+	height_contenu_inter= nb_ligne * (height_ligne + BORDER)
 
 	//printf("traité\n|%s|\n", contenu_mail_traiter);
 	printf("nb_ligne %d height %d\n", nb_ligne, nb_ligne * (height_ligne + BORDER));
 	// faire une fenetre adapté 
 	mail_contenu_inter= XCreateSimpleWindow(dpy, mail_contenu_fen, 0, 0,
 					       WIDTH_MAIL_CONTENU,
-					       nb_ligne * (height_ligne + BORDER),
+					       height_contenu_inter,
 					       0, 
 					       BlackPixel(dpy,DefaultScreen(dpy)),
 					       WhitePixel(dpy,DefaultScreen(dpy)));
@@ -216,12 +217,13 @@ void init_mail_win_graphique(int num_msg){
 
 void destroy_mail_win_graphique(void){
 
-	XDestroyWindow(dpy, mail_fen);
-	XDestroyWindow(dpy, mail_contenu_fen);
 	XDestroyWindow(dpy,  mail_contenu_inter);
+	XDestroyWindow(dpy, mail_contenu_fen);
 	XDestroyWindow(dpy,  quit_button);
-	XDestroyWindow(dpy,  slide_fond);
 	XDestroyWindow(dpy,  slider);
+	XDestroyWindow(dpy,  slide_fond);
+		XDestroyWindow(dpy, mail_fen);
+
 
 	XFreeGC(dpy, gc_glob);
 	XFreeFont(dpy, font);
