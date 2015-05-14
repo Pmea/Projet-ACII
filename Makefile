@@ -1,8 +1,8 @@
 CC= gcc
-CFLAGS= -Wall  -g -lm -lX11
+CFLAGS= -Wall -g -lm -lX11
 
 
-all: main-pop
+all: main-pop 
 
 #General
 main-pop.o: main-pop.c 

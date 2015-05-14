@@ -203,10 +203,7 @@ void expose(void){
 }
 
 void traiter_ExposeEvent(XExposeEvent xee){
-	printf("Expose Event: %d\n", xee.count);
-
 	if(xee.count == 0){
-		printf("Last Expose Event\n");
 		expose();
 	}
 }
@@ -228,7 +225,6 @@ void change_focus_attibute(Window focus_fen){
 }
 
 void traiter_ButtonPressEvent(XButtonEvent xbp){
-	printf("ButtonPress Event\n");
 	focus_fen= xbp.window;
 	change_focus_attibute(focus_fen);
 	focus_init=true;
@@ -240,16 +236,13 @@ void traiter_ButtonPressEvent(XButtonEvent xbp){
 	}
 
 	if(focus_fen == quit_general){
-		printf("Quit\n");
 		quit_cliquable=true;
 		return;
 	}
 	if(focus_fen == connect_button){
-		printf("CONNECTION\n");
 		if( strcmp(user_text, "")!=0 && strcmp(pass_text, "") != 0)
 			quit_log=true;
 	}
-	printf("CHANGEMENT DE FOCUS\n");
 }
 
 
@@ -265,7 +258,6 @@ void traiter_KeyPressEvent(XKeyEvent xke){
 	if(focus_init == false)
 		return; 
 
-	printf("KeyPress event\n");
 	char key[16];
 	KeySym sym;
 	XLookupString(&xke, key, 16, &sym, NULL);
@@ -334,7 +326,7 @@ void traiter_event(XEvent e){
 		traiter_KeyPressEvent(e.xkey);
 		return;
 	}
-	printf("PAS RECONNU EVENT \n");
+	printf("event nom prit en charge \n");
 }
 
 
@@ -358,10 +350,7 @@ void expose_mail_graphique(void){
 }
 
 void traiter_ExposeEvent_mail(XExposeEvent xee){
-	printf("Expose Event mail: %d\n", xee.count);
-
 	if(xee.count == 0){
-		printf("Last Expose Event\n");
 		int i;
 		for(i=0; i<nb_mails; i++){
 			XDrawString(dpy, mails_fen[i], gc_glob_general, MARGIN/2, MARGIN*3/2, mails_text[i], strlen(mails_text[i]));
@@ -396,7 +385,7 @@ void traiter_event_mails(XEvent e){
 		traiter_ButtonPress_sur_mail(e.xbutton);
 		return;
 	}
-	printf("PAS RECONNU EVENT \n");
+	printf("event non prit en charge\n");
 }
 
 void initialiser_champs(){

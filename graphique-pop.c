@@ -231,11 +231,6 @@ void init_mail_win_graphique(int num_msg){
 	printf("FIN DE L'INIT\n");
 }
 
-
-void destroy_graphique(void){
-	XFreeFont(dpy, font);
-}
-
 void destroy_mail_win_graphique(int num_msg){
 	tab_mails[num_msg].init_window=false;
 
@@ -247,6 +242,14 @@ void destroy_mail_win_graphique(int num_msg){
 	XDestroyWindow(dpy, tab_mails[num_msg].mail_fen);
 	XFreeGC(dpy,tab_mails[num_msg].gc_glob);
 
+}
+
+void destroy_graphique(void){
+	XFreeFont(dpy, font);
+	int i;
+	for(i=0; i< N; i++)
+		if(tab_mails[i].init_window == true)
+			destroy_mail_win_graphique(i);
 }
 
 
