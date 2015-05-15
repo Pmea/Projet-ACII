@@ -255,6 +255,7 @@ void retr_handler(int id_msg, char * sortie){
 		boundary[size_tmp+3]= '\n';
 		boundary[size_tmp+4]= '\0';				// voir pour les tailles
 		
+		int premier_bound=0;
 		while(strcmp(fgets(buff_ans, 128, fsock), boundary)!=0){			// on parcours tous le mail
 
 			if(strncmp(buff_ans, boundary, strlen(boundary) - 4) == 0){	
@@ -266,17 +267,25 @@ void retr_handler(int id_msg, char * sortie){
 					printf("Error email format\n");
 					exit(EXIT_FAILURE);
 				}
+
 				sprintf(name_file, "%s%d.%s", dir_name, id_msg, ext);
 				out= fopen(name_file, "w+");
 				if(out == NULL){
 					perror("Error open file out RETR");
 					exit(EXIT_FAILURE);
 				}
+				if(strcmp(ext,"asc") != 0 && strcmp(ext,"txt") != 0){
+					premier_bound++;
+				}
+				premier_bound++;
 			}
 			else{
 				printf("%s",buff_ans);
 				if( out!= NULL) 
 					fprintf(out, "%s", buff_ans);
+				if( sortie != NULL && premier_bound == 1){
+					strcat(sortie, buff_ans);
+				}
 			}
 		}
 		while(strcmp(fgets(buff_ans, 128, fsock), ".\r\n")!=0){}		// vide la fin
@@ -299,7 +308,6 @@ void retr_handler(int id_msg, char * sortie){
 
 		}
 		printf("%s", buff_ans);
-		//fprintf(out, "%s", buff_ans);
 		fclose(out);
 	}
 

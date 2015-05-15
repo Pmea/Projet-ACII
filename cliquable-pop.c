@@ -20,9 +20,6 @@
 #define WIDTH_MAIN WIDTH_LOG*2 + MARGIN * 3 + BORDER * 4 
 #define HEIGHT_MAIN 110 + HEIGHT_MAIL
 
-
-Window main_fen;
-
 Window log_user_fen;
 Window log_pass_fen;
 
@@ -255,7 +252,6 @@ void traiter_ButtonPressEvent(XButtonEvent xbp){
 }
 
 
-
 bool est_caractere_valide(char* key, KeySym sym){
 	if(strlen(key) != 1)
 		return false;
@@ -286,6 +282,7 @@ void traiter_KeyPressEvent(XKeyEvent xke){
 					XDrawString(dpy, log_pass_fen, gc_glob_general, MARGIN/2, MARGIN*3/2, pass_text, strlen(pass_text));
 				}
 			}
+		return;
 	}
 
 	if( sym == XK_Tab){
@@ -299,6 +296,7 @@ void traiter_KeyPressEvent(XKeyEvent xke){
 				change_focus_attibute(focus_fen);		
 			}
 		}
+		return;
 	}
 
 	if(est_caractere_valide(key, sym)){
@@ -314,10 +312,9 @@ void traiter_KeyPressEvent(XKeyEvent xke){
 				XDrawString(dpy, log_pass_fen, gc_glob_general, MARGIN/2, MARGIN*3/2, pass_text, strlen(pass_text));		
 			}
 		}
+		return;
 	}
-	else{
-		printf("caractere non valide\n");
-	}
+	printf("caractere non valide\n");
 }
 
 
@@ -335,7 +332,7 @@ void traiter_event(XEvent e){
 		traiter_KeyPressEvent(e.xkey);
 		return;
 	}
-	printf("event nom prit en charge \n");
+	printf("event non prit en charge \n");
 }
 
 

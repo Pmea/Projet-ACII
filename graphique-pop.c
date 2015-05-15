@@ -27,6 +27,8 @@ XColor color_fond_de_fen;
 
 XFontStruct* font;
 
+bool besoin_msg_erreur;
+
 
 typedef struct mail_t{
 	int num_du_msg;
@@ -83,11 +85,15 @@ void init_mail_win_graphique(int num_msg){
 					       BlackPixel(dpy,DefaultScreen(dpy)),
 					       WhitePixel(dpy,DefaultScreen(dpy)));
 
-
 	// faire la requete 
 	char * contenu_mail= (char*) malloc(sizeof(char) * 4096);
 	retr_handler(num_msg, contenu_mail);
-	//printf("contenu_mail:%s\n", contenu_mail );
+	if(strcmp(contenu_mail, "") == 0){
+		XDrawString(dpy, main_fen, DefaultGC(dpy,DefaultScreen(dpy)), 10, 20, "Mail multi part non conforme", strlen("Mail multi part non conforme") );
+		besoin_msg_erreur=true;
+		return;
+	}
+	printf("contenu_mail: %s\n",contenu_mail );
 
 	int font_direction, font_ascent, font_descent;
 	XCharStruct text_structure;
@@ -101,7 +107,6 @@ void init_mail_win_graphique(int num_msg){
 	int nb_ligne=0;
 
 	tab_mails[num_msg].height_ligne=font_descent + font_ascent;
-	printf("height_ligne: %d\n", tab_mails[num_msg].height_ligne );
 
 	// traiter le text
 	tab_mails[num_msg].contenu_mail_traiter= (char*) malloc(sizeof(char) * 4096);
@@ -112,8 +117,6 @@ void init_mail_win_graphique(int num_msg){
 	for(line= strtok(contenu_mail, "\n") ; line != NULL; line= strtok(NULL, "\n")){
 		nb_ligne++;
 		width_tmp=0;
-
-		//printf("line: %s\n", line);
 
 		char* debutmot=line;
 		int cmpt=0;
@@ -127,19 +130,14 @@ void init_mail_win_graphique(int num_msg){
 				if(debutmot[cmpt] == ' ' ){
 					XTextExtents(font, debutmot+debut, cmpt-debut+1, &font_direction, &font_ascent,  &font_descent, &text_structure);
 					if(width_tmp + text_structure.width> width_max){
-						// inserer un retour a la ligne 
 						strcat(tab_mails[num_msg].contenu_mail_traiter, "\n");
 						width_tmp=0;
-						//printf("NOUVELLE LIGNE\n");
 						nb_ligne++;
 					}
 					else{
 						width_tmp+= text_structure.width;
 					}	
-					//printf("width:%d\n", width_tmp);
-
-					//char* coincoin= strndup( debutmot+debut, cmpt-debut+1);
-					//printf("MOT: |%s|\n", coincoin);
+			
 					
 					strncat(tab_mails[num_msg].contenu_mail_traiter, debutmot+debut, cmpt-debut+1);
 
@@ -151,19 +149,14 @@ void init_mail_win_graphique(int num_msg){
 		if(cmpt-debut > 1){
 			XTextExtents(font, debutmot+debut, cmpt-debut+1, &font_direction, &font_ascent,  &font_descent, &text_structure);
 			if(width_tmp + text_structure.width> width_max){
-				// inserer un retour a la ligne 
 				strcat(tab_mails[num_msg].contenu_mail_traiter, "\n");
 				width_tmp=0;
-				//printf("NOUVELLE LIGNE\n");
 				nb_ligne++;
 			}
 			else{
 				width_tmp+= text_structure.width;
 			}	
-			//printf("width:%d\n", width_tmp);
-
-			//char* coincoin= strndup( debutmot+debut, cmpt-debut-1);
-			//printf("MOT: |%s|\n", coincoin);
+			
 			strncat(tab_mails[num_msg].contenu_mail_traiter, debutmot+debut, cmpt-debut);
 			debut+=(cmpt-debut+1);
 			cmpt++;
@@ -175,8 +168,6 @@ void init_mail_win_graphique(int num_msg){
 	free(contenu_mail);
 	tab_mails[num_msg].height_contenu_inter= nb_ligne * (tab_mails[num_msg].height_ligne + BORDER);
 
-	printf("nb_ligne %d height %d\n", nb_ligne, nb_ligne * (tab_mails[num_msg].height_ligne + BORDER));
-	//printf("contenu_mail_traiter: %s\n", tab_mails[num_msg].contenu_mail_traiter);
 	// faire une fenetre adapté 
 	tab_mails[num_msg].mail_contenu_inter= XCreateSimpleWindow(dpy, tab_mails[num_msg].mail_contenu_fen, 0, 0,
 					       WIDTH_MAIL_CONTENU,
@@ -228,7 +219,6 @@ void init_mail_win_graphique(int num_msg){
 	XFlush(dpy);
 
 	tab_mails[num_msg].init_window=true;
-	printf("FIN DE L'INIT\n");
 }
 
 void destroy_mail_win_graphique(int num_msg){
@@ -258,7 +248,6 @@ void traiter_ButtonRelease_sur_mail_graphique(XButtonEvent  xbe){
 	for(i=0; i<N; i++){
 		if(tab_mails[i].init_window == true){	
 			if(xbe.window == tab_mails[i].slider){
-				printf("SLIDER unclic\n");
 				return;
 			}
 		}
@@ -268,10 +257,13 @@ void traiter_ButtonRelease_sur_mail_graphique(XButtonEvent  xbe){
 
 // voir si il n'y a pas d'amelioration 
 void expose_graphique(Window win){
+	if(besoin_msg_erreur==true){
+		XClearWindow(dpy, main_fen);
+	}
+
 	int k;
 	for(k=0; k<N; k++){
 		if(tab_mails[k].init_window == true){
-			printf("%d: init\n", k);
 			XDrawString(dpy, tab_mails[k].quit_button, tab_mails[k].gc_glob, MARGIN/2, MARGIN*3/2, "Quit", strlen("Quit"));
 			
 			if(tab_mails[k].contenu_mail_traiter != NULL){
@@ -286,9 +278,6 @@ void expose_graphique(Window win){
 						j++;
 					}
 
-					char* coincoin= strndup( tab_mails[k].contenu_mail_traiter+i, j);
-					printf("MOT: |%s|\n", coincoin);
-
 					XDrawString(dpy, tab_mails[k].mail_contenu_inter, tab_mails[k].gc_glob, 5, line*(tab_mails[k].height_ligne+ BORDER), tab_mails[k].contenu_mail_traiter+i, j);
 					i+=j;
 					i++;
@@ -300,7 +289,6 @@ void expose_graphique(Window win){
 
 
 void traiter_ButtonPress_sur_mail_graphique(XButtonEvent  xbe){	// besoin de regarder la fenetre !! main ou l'autre 
-	printf("buttonPress event\n");
 	if(xbe.window == quit_general){
 		quit_cliquable=true;
 		return;
@@ -317,13 +305,11 @@ void traiter_ButtonPress_sur_mail_graphique(XButtonEvent  xbe){	// besoin de reg
 	
 	for(i=0; i<N; i++){
 		if(xbe.window == tab_mails[i].slider){
-			printf("SLIDER clic\n");
 			XEvent tmp;
 			XNextEvent(dpy, &tmp);
 
 			int pos= xbe.y_root;
 			while(tmp.type != ButtonRelease){
-				printf("BOUCLE\n");
 				if(tmp.type == Expose){
 					expose_graphique(tab_mails[i].slider);
 				}
@@ -359,10 +345,8 @@ void traiter_ButtonPress_sur_mail_graphique(XButtonEvent  xbe){	// besoin de reg
 
 
 void traiter_ExposeEvent_mail_graphique(XExposeEvent xee){
-	printf("Expose Event: %d\n", xee.count);
 
 	if(xee.count == 0){
-		printf("Last Expose Event\n");
 		expose_mail_graphique();
 		expose_graphique(xee.window);
 	}
@@ -375,7 +359,6 @@ void traiter_event_mails_graphique(XEvent e){
 	}
 	if(e.type == ButtonPress){
 		traiter_ButtonPress_sur_mail_graphique(e.xbutton);
-		printf("FIN EVENT\n");
 		return;
 	}
 
@@ -385,9 +368,8 @@ void traiter_event_mails_graphique(XEvent e){
 	}
 
 	if(e.type == MotionNotify){
-		//il faudrait faire un traitant
 		return;
 	}
-	printf("PAS RECONNU EVENT \n");
+	printf("event non prit en charge \n");
 }
 

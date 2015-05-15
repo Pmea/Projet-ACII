@@ -26,6 +26,7 @@
 bool quit_cliquable;
 bool quit_log;
 Window quit_general;
+Window main_fen;
 
 Display * dpy;
 
