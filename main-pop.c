@@ -89,12 +89,12 @@ int main_cliquable(int argc, char* argv[]){
 
 	//init_connexion
 
-	printf("Trying %s...\n", argv[1]);
+	//printf("Trying %s...\n", argv[1]);
 	if(init_connexion(argv[1], atoi(argv[2])) == false){
 		printf("Error initilize connexion\n");
 		exit(EXIT_FAILURE);
 	}
-	printf("Connected to %s\n", argv[1]);
+	//printf("Connected to %s\n", argv[1]);
 
 	while(quit_cliquable== false && quit_log == false) {	
 		traiter_event(event);

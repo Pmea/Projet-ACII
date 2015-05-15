@@ -243,15 +243,10 @@ void retr_handler(int id_msg, char * sortie){
 	dir_name[0]='\0';
 
 	if(multipart == true){
-		//printf("MULTIPART\n");
-
 		sprintf(dir_name, "%d", id_msg);
-			
-			
 		mkdir(dir_name, 0744);					//pas de verification 
 
 		sprintf(dir_name,"%s/", dir_name);
-		//printf("|%s|\n", boundary);
 
 		int size_tmp= strlen(boundary);
 		boundary[size_tmp]= '-';
@@ -296,7 +291,6 @@ void retr_handler(int id_msg, char * sortie){
 	}
 
 	else{
-		//printf("MAIL NORMAL\n");
 		sprintf(name_file, "%s%d.%s", dir_name, id_msg, ext);
 		out= fopen(name_file, "w+");
 		if(out == NULL){

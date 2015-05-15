@@ -21,6 +21,14 @@
 
 #define N 10 +1
 
+
+#define CODE_CURS_XC_draft_large 60
+
+Cursor cursor;
+
+
+
+
 XColor color_fond;
 XColor color_focus;
 XColor color_fond_de_fen;
@@ -67,6 +75,7 @@ void init_graphique(void){
 	 	fprintf(stderr," Sorry, having font problems.\n");
 	    exit(-1);
 	}
+	cursor= XCreateFontCursor(dpy, CODE_CURS_XC_draft_large);
 }
 
 void init_mail_win_graphique(int num_msg){
@@ -88,11 +97,10 @@ void init_mail_win_graphique(int num_msg){
 	char * contenu_mail= (char*) malloc(sizeof(char) * 4096);
 	retr_handler(num_msg, contenu_mail);
 	if(strcmp(contenu_mail, "") == 0){
-		//XDrawString(dpy, main_fen, DefaultGC(dpy,DefaultScreen(dpy)), 10, 20, "Mail multi part non conforme", strlen("Mail multi part non conforme") );
+		XDrawString(dpy, main_fen, DefaultGC(dpy,DefaultScreen(dpy)), 10, 20, "Mail multi part non conforme", strlen("Mail multi part non conforme") );
 		besoin_msg_erreur=true;
 		return;
 	}
-	printf("contenu_mail: %s\n",contenu_mail );
 
 	int font_direction, font_ascent, font_descent;
 	XCharStruct text_structure;
@@ -207,6 +215,8 @@ void init_mail_win_graphique(int num_msg){
 	XSelectInput(dpy, tab_mails[num_msg].mail_contenu_inter, ExposureMask);
 	XSelectInput(dpy, tab_mails[num_msg].slider, PointerMotionMask |  ButtonReleaseMask | ButtonPressMask | ExposureMask);
 
+	XDefineCursor(dpy, tab_mails[num_msg].quit_button, cursor);
+
 
 	XMapWindow(dpy, tab_mails[num_msg].mail_fen);
 	XMapSubwindows(dpy, tab_mails[num_msg].mail_fen);
@@ -236,6 +246,7 @@ void destroy_mail_win_graphique(int num_msg){
 void destroy_graphique(void){
 	if(font != NULL)
 		XFreeFont(dpy, font);
+	XFreeCursor(dpy, cursor );
 	int i;
 	for(i=0; i< N; i++)
 		if(tab_mails[i].init_window == true)
