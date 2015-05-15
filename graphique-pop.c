@@ -173,7 +173,7 @@ void init_mail_win_graphique(int num_msg){
 	}
 
 	free(contenu_mail);
-	tab_mails[num_msg].height_contenu_inter= nb_ligne * (tab_mails[num_msg].height_ligne + BORDER);
+	tab_mails[num_msg].height_contenu_inter= nb_ligne * (tab_mails[num_msg].height_ligne + BORDER) + MARGIN;
 
 	// faire une fenetre adapté 
 	tab_mails[num_msg].mail_contenu_inter= XCreateSimpleWindow(dpy, tab_mails[num_msg].mail_contenu_fen, 0, 0,
@@ -308,7 +308,6 @@ void traiter_ButtonPress_sur_mail_graphique(XButtonEvent  xbe){	// besoin de reg
 	int i;
 	for(i=0; i< N; i++){
 		if(xbe.window == tab_mails[i].quit_button){
-			printf("Quit fenetre\n");
 			destroy_mail_win_graphique(i);
 			return;
 		}
@@ -381,6 +380,5 @@ void traiter_event_mails_graphique(XEvent e){
 	if(e.type == MotionNotify){
 		return;
 	}
-	printf("event non prit en charge \n");
 }
 

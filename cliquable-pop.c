@@ -116,7 +116,7 @@ bool init_log_win(){
 					       HEIGHT_BUTTON,
 					       BORDER, 
 					       BlackPixel(dpy,DefaultScreen(dpy)),
-					       color_fond.pixel);
+							color_fond.pixel);
 
 	fleche= XCreateFontCursor(dpy, CODE_CURS_XC_xterm);
 	XDefineCursor(dpy, log_user_fen, fleche);
@@ -237,7 +237,6 @@ void traiter_ButtonPressEvent(XButtonEvent xbp){
 	focus_init=true;
 
 	if(strlen(msg_erreur) != 0){
-		printf("MSG erreur %s\n", msg_erreur);
 		XClearWindow(dpy, main_fen);
 		msg_erreur[0]='\0';
 	}
@@ -315,7 +314,6 @@ void traiter_KeyPressEvent(XKeyEvent xke){
 		}
 		return;
 	}
-	printf("caractere non valide\n");
 }
 
 
@@ -333,7 +331,10 @@ void traiter_event(XEvent e){
 		traiter_KeyPressEvent(e.xkey);
 		return;
 	}
-	printf("event non prit en charge \n");
+
+	if(e.type == KeyPress){
+		return;
+	}	
 }
 
 
@@ -391,7 +392,6 @@ void traiter_event_mails(XEvent e){
 		traiter_ButtonPress_sur_mail(e.xbutton);
 		return;
 	}
-	printf("event non prit en charge\n");
 }
 
 void initialiser_champs(){
@@ -403,7 +403,6 @@ void initialiser_champs(){
 
 void afficher_msg(char* msg){
 	strncpy(msg_erreur, msg, MAX_LENGTH);
-	//printf("msg %s\n", msg_erreur);
 	change_focus_attibute(main_fen);
 }
 

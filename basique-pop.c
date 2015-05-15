@@ -176,7 +176,6 @@ int list_handler(char * sortie){
 		}
 		compt_msg++;
 	}
-	//printf("%s", buff_ans);
 
 	if(strncmp(buff_ans, "-ERR", 4) == 0)
 		return -1;
@@ -206,14 +205,12 @@ bool annalyser_Entete(regex_t r, char* ext, char* boundary){
 					char * tmpbound= (char*) malloc(sizeof(char) * LINELENGTH - 4);
 					tmpbound=strndup(buff_ans + (int) m[4].rm_so, m[4].rm_eo - m[4].rm_so);
 					strcpy(boundary, tmpbound);
-					//printf("boundary: %s\n",  boundary);
 					free(tmpbound);
 				}
 				else{
 					char* tmp= (char*) malloc(sizeof(char) * MAXEXTLENGTH);
 					tmp= rechercher(type);
 					strcpy(ext, tmp);
-					//printf("TYPE: %s EXT:%s\n",  type, ext);
 					free(type);
 				}
 			}
