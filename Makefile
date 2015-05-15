@@ -38,4 +38,4 @@ g-test: main-pop
 
 
 clean:
-	rm t-test c-test g-test *.o 
+	rm main-pop *.o 

@@ -140,7 +140,10 @@ bool pass_handler(char* arg){
 	return true;
 }
 
-int list_handler(void){
+int list_handler(char * sortie){
+	if(sortie != NULL)
+		sortie[0]='\0';
+	
 	//envoi requet
 	if(fwrite("LIST\r\n", strlen("LIST\r\n"), sizeof(char), fsock) == -1){
 		perror("Error write in socket");
@@ -151,10 +154,12 @@ int list_handler(void){
 	char buff_ans[128];
 	//recuperation reponse
 	while(strcmp(fgets(buff_ans, 128, fsock), ".\r\n") !=0){
-		printf("%s",buff_ans);
+		if(sortie != NULL){
+			strcat(sortie, buff_ans);
+		}
 		compt_msg++;
 	}
-	printf("%s", buff_ans);
+	//printf("%s", buff_ans);
 
 	if(strncmp(buff_ans, "-ERR", 4) == 0)
 		return -1;
@@ -184,14 +189,14 @@ bool annalyser_Entete(regex_t r, char* ext, char* boundary){
 					char * tmpbound= (char*) malloc(sizeof(char) * LINELENGTH - 4);
 					tmpbound=strndup(buff_ans + (int) m[4].rm_so, m[4].rm_eo - m[4].rm_so);
 					strcpy(boundary, tmpbound);
-					printf("boundary: %s\n",  boundary);
+					//printf("boundary: %s\n",  boundary);
 					free(tmpbound);
 				}
 				else{
 					char* tmp= (char*) malloc(sizeof(char) * MAXEXTLENGTH);
 					tmp= rechercher(type);
 					strcpy(ext, tmp);
-					printf("TYPE: %s EXT:%s\n",  type, ext);
+					//printf("TYPE: %s EXT:%s\n",  type, ext);
 					free(type);
 				}
 			}
@@ -238,7 +243,7 @@ void retr_handler(int id_msg, char * sortie){
 	dir_name[0]='\0';
 
 	if(multipart == true){
-		printf("MULTIPART\n");
+		//printf("MULTIPART\n");
 
 		sprintf(dir_name, "%d", id_msg);
 			
@@ -246,7 +251,7 @@ void retr_handler(int id_msg, char * sortie){
 		mkdir(dir_name, 0744);					//pas de verification 
 
 		sprintf(dir_name,"%s/", dir_name);
-		printf("|%s|\n", boundary);
+		//printf("|%s|\n", boundary);
 
 		int size_tmp= strlen(boundary);
 		boundary[size_tmp]= '-';
@@ -280,7 +285,6 @@ void retr_handler(int id_msg, char * sortie){
 				premier_bound++;
 			}
 			else{
-				printf("%s",buff_ans);
 				if( out!= NULL) 
 					fprintf(out, "%s", buff_ans);
 				if( sortie != NULL && premier_bound == 1){
@@ -292,7 +296,7 @@ void retr_handler(int id_msg, char * sortie){
 	}
 
 	else{
-		printf("MAIL NORMAL\n");
+		//printf("MAIL NORMAL\n");
 		sprintf(name_file, "%s%d.%s", dir_name, id_msg, ext);
 		out= fopen(name_file, "w+");
 		if(out == NULL){
@@ -300,14 +304,11 @@ void retr_handler(int id_msg, char * sortie){
 			exit(EXIT_FAILURE);
 		}
 		while(strcmp(fgets(buff_ans, 128, fsock), ".\r\n")!=0){
-			printf("%s",buff_ans);
 			fprintf(out, "%s", buff_ans);
 			if(sortie != NULL){
 				strcat(sortie, buff_ans);
 			}
-
 		}
-		printf("%s", buff_ans);
 		fclose(out);
 	}
 
@@ -332,7 +333,6 @@ bool top_handler(int id_msg, int nb_ligne, char * sortie){
 	char buff_ans[128];
 	//recuperation reponse
 	while(strcmp(fgets(buff_ans, 128, fsock), ".\r\n") != 0){
-		printf( "%s", buff_ans);
 		if(sortie != NULL){
 			strcat(sortie, buff_ans);
 		}
@@ -340,7 +340,6 @@ bool top_handler(int id_msg, int nb_ligne, char * sortie){
 			return false;
 		}
 	}
-	printf( "%s", buff_ans);
 
 	return true;
 }

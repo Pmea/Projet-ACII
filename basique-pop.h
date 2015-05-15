@@ -9,7 +9,7 @@ bool close_connexion(void);
 bool user_handler(char* arg);
 bool pass_handler(char* arg);
 
-int list_handler(void);
+int list_handler(char* sortie);
 
 void retr_handler(int id_msg, char* sortie );
 bool top_handler(int id_msg, int nb_ligne, char* sortie);

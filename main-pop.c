@@ -112,9 +112,9 @@ int main_cliquable(int argc, char* argv[]){
 	}
 
 	detruire_log_win();
-	
+
 	if(quit_log == true){
-		int nb_msg= list_handler();
+		int nb_msg= list_handler(NULL);
 
 		char ** top_tab= (char**) malloc(sizeof(char*) * nb_msg);
 		int i;
@@ -180,7 +180,7 @@ int main_graphique(int argc, char* argv[]){
 	detruire_log_win();
 	
 	if(quit_log == true){
-		int nb_msg= list_handler();
+		int nb_msg= list_handler(NULL);
 
 		char ** top_tab= (char**) malloc(sizeof(char*) * nb_msg);
 		int i;
@@ -231,6 +231,8 @@ int main_textuel(int argc, char* argv[]){
 	bool finish= false;
 	int indice;
 
+	char* reponse=malloc(sizeof(char) * 4096);
+
 	while(finish != true){
 		if(fgets(cmd, 128, stdin) == NULL){
 			printf("Error read on stdin is unavailable");
@@ -264,13 +266,14 @@ int main_textuel(int argc, char* argv[]){
 			case 'L':
 				if(strncasecmp(cmd, "LIST", 4) == 0){
 					printf("->LIST\n");
-					list_handler();		
+
+					list_handler(reponse);
+					printf("%s\n", reponse);	
 				}				
 				break;
 			case 'T':
 				if(strncasecmp(cmd, "TOP", 3) == 0){
 					printf("->TOP\n");
-					//top_handler();
 					if((indice= supp_space(cmd, 3)) == -1){
 						printf("Invalide argument, please enter a new command\n");
 					}
@@ -279,9 +282,9 @@ int main_textuel(int argc, char* argv[]){
 						int msg_id=atoi(cmd+indice);
 						indice= supp_space(cmd, 3 + indice + (int) log10(msg_id));
 						int nb_ligne=atoi(cmd+indice);
-					
-						top_handler(msg_id, nb_ligne, NULL);
 						
+						top_handler(msg_id, nb_ligne, reponse);
+						printf("%s\n", reponse);						
 					}
 				}
 				break;
@@ -295,7 +298,9 @@ int main_textuel(int argc, char* argv[]){
 						//traiter commande
 						int msg_id;
 						msg_id= atoi(cmd+indice); 
-						retr_handler(msg_id, NULL);
+						retr_handler(msg_id, reponse);
+						printf("MAIL RECUPERE\n");
+						//printf("REPONSE: %s\n", reponse);
 					}
 				}
 				break;
@@ -307,8 +312,8 @@ int main_textuel(int argc, char* argv[]){
 				printf("Command unknow please enter a new one\n");
 				break;
 		}
-
 	}
+	free(reponse);
 
 	if(close_connexion() == false){
 		printf("Error close connexion\n");

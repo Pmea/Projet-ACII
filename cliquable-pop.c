@@ -403,7 +403,7 @@ void initialiser_champs(){
 
 void afficher_msg(char* msg){
 	strncpy(msg_erreur, msg, MAX_LENGTH);
-	printf("msg %s\n", msg_erreur);
+	//printf("msg %s\n", msg_erreur);
 	change_focus_attibute(main_fen);
 }
 
