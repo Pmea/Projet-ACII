@@ -4,8 +4,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <sys/socket.h>		/* pour socket */
-#include <netinet/in.h>		/* pour sockaddr_in et INET_ADDRSTRLEN */
+#include <sys/socket.h>
+#include <netinet/in.h>
 #include <netdb.h>	
 #include <arpa/inet.h>
 
@@ -29,17 +29,17 @@ bool init_connexion(const char* server, int port, char* sortie){
 	char ascii_buffer[LINELENGTH];
 	char sport[255];
 
-	struct addrinfo addrHints, *addrResult; // adresses desirees / recuperees
-	struct addrinfo *addrTmp;                //adresse temporaire
+	struct addrinfo addrHints, *addrResult;
+	struct addrinfo *addrTmp;               
 
 	int i;
 	int error;
-	sprintf(sport,"%i",port);        //conversion du no de port en chaine de char
-	memset(&addrHints, 0, sizeof(addrHints));     // raz
-	addrHints.ai_family = AF_INET;                //famille  TCP/IP ipv4
-	addrHints.ai_socktype = SOCK_STREAM;        // avoir une socket de type stream
+	sprintf(sport,"%i",port);       
+	memset(&addrHints, 0, sizeof(addrHints));     
+	addrHints.ai_family = AF_INET;                
+	addrHints.ai_socktype = SOCK_STREAM;       
 
-	error = getaddrinfo(server, sport, &addrHints, &addrResult);				// nom du server, port server, addrHint type de service utiliser, les differents resultats
+	error = getaddrinfo(server, sport, &addrHints, &addrResult);				
 	if (error) {
 		printf("Client Erreur %d getaddrinfo error for host %s %s:\n", error,server, sport);
 		printf("\t%s\n",gai_strerror(error));
@@ -72,7 +72,7 @@ bool init_connexion(const char* server, int port, char* sortie){
 	fsock= fdopen(sock, "r+");
 
 	char buff_ans[128];
-	//recuperation reponse
+	//recuperation du message serveur 
 	if(fgets(buff_ans, 128, fsock)== NULL){
 		perror("Error Server answer");
 	}
@@ -94,7 +94,7 @@ bool user_handler(char* arg, char* sortie){
 	if(sortie != NULL)
 		sortie[0]='\0';
 
-	//envoier requet
+	//envoi requete
 	if(fwrite("USER ", strlen("USER "), sizeof(char), fsock) == -1){
 		perror("Error write in socket");
 		exit(EXIT_FAILURE);
@@ -130,7 +130,7 @@ bool pass_handler(char* arg, char* sortie){
 		sortie[0]='\0';
 	}
 
-	//envoier requet
+	//envoi requete
 	if(fwrite("PASS ", strlen("PASS "), sizeof(char), fsock) == -1){
 		perror("Error write in socket");
 		exit(EXIT_FAILURE);	
@@ -161,7 +161,7 @@ int list_handler(char * sortie){
 	if(sortie != NULL)
 		sortie[0]='\0';
 	
-	//envoi requet
+	//envoi requete
 	if(fwrite("LIST\r\n", strlen("LIST\r\n"), sizeof(char), fsock) == -1){
 		perror("Error write in socket");
 		exit(EXIT_FAILURE);	
@@ -184,7 +184,7 @@ int list_handler(char * sortie){
 
 
 
-// true si pas d'erreur, si bool multipart true alors bondary != NULL
+// true si pas d'erreur dans l'analyse des entete, si multipart alors bondary != NULL
 bool annalyser_Entete(regex_t r, char* ext, char* boundary){
 	char buff_ans[128];
 	bool multipart=false;
@@ -220,7 +220,6 @@ bool annalyser_Entete(regex_t r, char* ext, char* boundary){
 
 const char* regex_content_type= "^(Content-[tT]ype:)[[:space:]]+([A-Za-z0-9~+.:/-]+)(.+boundary=\"(.*)\")?";
 
-// TODO ne pas compiler la regexp a chaque fois 
 void retr_handler(int id_msg, char * sortie){
 	if(sortie != NULL)
 		sortie[0]='\0';
@@ -248,6 +247,7 @@ void retr_handler(int id_msg, char * sortie){
 	char* boundary=(char*) malloc(sizeof(char) * LINELENGTH);
 	boundary[0]='-';
 	boundary[1]='-';
+
 	//recuperation reponse
 	bool multipart=annalyser_Entete(r, ext, boundary+2);
 
@@ -258,19 +258,20 @@ void retr_handler(int id_msg, char * sortie){
 
 	if(multipart == true){
 		sprintf(dir_name, "%d", id_msg);
-		mkdir(dir_name, 0744);					//pas de verification 
+		mkdir(dir_name, 0744);					// pas de verification, si le dossier est absent, 
+												// on le cree sinon on peut deja ajouter les fichiers 
 
 		sprintf(dir_name,"%s/", dir_name);
 
 		int size_tmp= strlen(boundary);
-		boundary[size_tmp]= '-';
-		boundary[size_tmp+1]= '-';
-		boundary[size_tmp+2]= '\r';
+		boundary[size_tmp]= '-';				// on ajouter les caracteres au bondary pour 
+		boundary[size_tmp+1]= '-';				// avoir chaine delimitant la fin du mail
+		boundary[size_tmp+2]= '\r';	
 		boundary[size_tmp+3]= '\n';
-		boundary[size_tmp+4]= '\0';				// voir pour les tailles
+		boundary[size_tmp+4]= '\0';
 		
 		int premier_bound=0;
-		while(strcmp(fgets(buff_ans, 128, fsock), boundary)!=0){			// on parcours tous le mail
+		while(strcmp(fgets(buff_ans, 128, fsock), boundary)!=0){		// on parcours toutes parties 
 
 			if(strncmp(buff_ans, boundary, strlen(boundary) - 4) == 0){	
 				if(out != NULL)
@@ -301,10 +302,10 @@ void retr_handler(int id_msg, char * sortie){
 				}
 			}
 		}
-		while(strcmp(fgets(buff_ans, 128, fsock), ".\r\n")!=0){}		// vide la fin
+		while(strcmp(fgets(buff_ans, 128, fsock), ".\r\n")!=0){}		// vide la fin du mail qui ne contient plus de fichier
 	}
 
-	else{
+	else{			//si c'est un mail simple
 		sprintf(name_file, "%s%d.%s", dir_name, id_msg, ext);
 		out= fopen(name_file, "w+");
 		if(out == NULL){

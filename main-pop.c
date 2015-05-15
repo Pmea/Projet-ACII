@@ -226,7 +226,6 @@ int main_textuel(int argc, char* argv[]){
 		exit(EXIT_FAILURE);
 	}
 	printf("%s\n", reponse);
-
 	printf("Connected to %s\n", argv[1]);
 
 	char cmd [128];
@@ -243,8 +242,8 @@ int main_textuel(int argc, char* argv[]){
 			case 'U':
 				if(strncasecmp(cmd, "USER", 4) == 0){
 					printf("->USER\n");
-					if((indice= supp_space(cmd, 4)) == -1){
-						printf("Invalide argument, please enter a new command\n");
+					if((indice= supp_space(cmd, 4)) == -1){							// si les arguments ne sont pas valide
+						printf("Invalide argument, please enter a new command\n");	// on n'envoi pas de requete au serveur
 					}
 					else{	
 						user_handler(cmd+indice, reponse);
@@ -259,7 +258,6 @@ int main_textuel(int argc, char* argv[]){
 						printf("Invalide argument, please enter a new command\n");
 					}
 					else{	
-						//traiter commande
 						pass_handler(cmd+indice, reponse);
 						printf("%s\n", reponse);
 					}
@@ -280,7 +278,6 @@ int main_textuel(int argc, char* argv[]){
 						printf("Invalide argument, please enter a new command\n");
 					}
 					else{	
-						//traiter commande
 						int msg_id=atoi(cmd+indice);
 						indice= supp_space(cmd, 3 + indice + (int) log10(msg_id));
 						int nb_ligne=atoi(cmd+indice);
@@ -297,12 +294,10 @@ int main_textuel(int argc, char* argv[]){
 						printf("Invalide argument, please enter a new command\n");
 					}
 					else{	
-						//traiter commande
 						int msg_id;
 						msg_id= atoi(cmd+indice); 
 						retr_handler(msg_id, reponse);
-						printf("MAIL RECUPERE\n");
-						//printf("REPONSE: %s\n", reponse);
+						printf("mail recupere\n");
 					}
 				}
 				break;
@@ -335,6 +330,7 @@ int main (int argc, char* argv[]){
 		exit(EXIT_FAILURE);
 	}
 
+	// on regarde l'argument pour savoir quoi lancer
 	switch(option(argc, argv)){
 		case 't':
 			main_textuel(argc, argv);
