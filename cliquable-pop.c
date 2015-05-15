@@ -45,12 +45,12 @@ Cursor fleche, clic;
 Window focus_fen;
 bool focus_init= false;
 
-
+// creation fenetre principale
 bool init_main_win(){
 	msg_erreur[0]='\0';
 
 	if ((dpy = XOpenDisplay(NULL)) == NULL){
-  		printf("Erro open display");
+  		printf("Error open display");
   		exit(EXIT_FAILURE);
   	}
 
@@ -96,6 +96,8 @@ bool init_main_win(){
 
 	return true;
 }
+
+// creation fenetre de connection
 bool init_log_win(){
 	log_user_fen=  XCreateSimpleWindow(dpy, main_fen, MARGIN, MARGIN,
 					       WIDTH_LOG,
@@ -138,6 +140,7 @@ bool init_log_win(){
 	return true;
 }
 
+// creation sous fenetres pour les mails
 bool init_pop_win(int nb_mail, char ** top_mails){
 	nb_mails=nb_mail;
 
@@ -181,9 +184,6 @@ bool detruire_main_win(){
 	XFreeCursor(dpy, fleche);
 	XFreeCursor(dpy, clic);
 	XDestroySubwindows(dpy, main_fen);
-	//XFreeColors(dpy, DefaultScreen(dpy), color_fond.pixel, 1);
-	//XFreeColors(dpy, DefaultScreen(dpy), color_focus.pixel, 1);
-	//XFreeColors(dpy, DefaultScreen(dpy), color_fond_de_fen.pixel, 1);
 	XFreeGC(dpy, gc_glob_general);
 	XFreeFont(dpy, font_general);
 	XCloseDisplay(dpy);
@@ -210,7 +210,7 @@ void expose(void){
 }
 
 void traiter_ExposeEvent(XExposeEvent xee){
-	if(xee.count == 0){
+	if(xee.count == 0){		//si c'est le dernier expose de la serie
 		expose();
 	}
 }
@@ -267,8 +267,8 @@ void traiter_KeyPressEvent(XKeyEvent xke){
 	KeySym sym;
 	XLookupString(&xke, key, 16, &sym, NULL);
 
-	if( sym == XK_BackSpace){
-		XClearWindow(dpy, focus_fen);
+	if( sym == XK_BackSpace){			// on supprime toute la fenetre
+		XClearWindow(dpy, focus_fen);	// et on redessine la chaine moins le dernier caractere
 			if(focus_fen == log_user_fen){
 				if(strlen(user_text) > 0){
 					user_text[strlen(user_text) -1]= '\0';
@@ -285,7 +285,7 @@ void traiter_KeyPressEvent(XKeyEvent xke){
 		return;
 	}
 
-	if( sym == XK_Tab){
+	if( sym == XK_Tab){		// si on apprit sur tab, on change de case champs pour ecrire
 		if(focus_fen == log_user_fen){
 			focus_fen= log_pass_fen;
 			change_focus_attibute(focus_fen);
@@ -341,7 +341,7 @@ void traiter_event(XEvent e){
 void expose_mail(void){
 	int i;
 	for(i=0; i<nb_mails; i++){
-		if(recup_mail[i]== true)
+		if(recup_mail[i]== true)				// si on n'a deja cliqué sur le mail, il est grisé
 			XSetWindowBackground(dpy, mails_fen[i], color_focus.pixel);
 		XUnmapWindow(dpy, mails_fen[i]);
 		XMapWindow(dpy, mails_fen[i]);
@@ -374,10 +374,9 @@ void traiter_ButtonPress_sur_mail(XButtonEvent xbe){
 
 	int i;
 	for(i=0; i<nb_mails; i++){
-		if(mails_fen[i] ==  xbe.window && recup_mail[i] == false){
-			//recuperer email
-			recup_mail[i]=true;
-			retr_handler(i+1, NULL);
+		if(mails_fen[i] ==  xbe.window && recup_mail[i] == false){	
+			recup_mail[i]=true;				// si on a cliqué sur mail et 
+			retr_handler(i+1, NULL);        //que l'on ne l'a pas encore recuperé
 		}
 	}
 	expose_mail();
@@ -394,6 +393,7 @@ void traiter_event_mails(XEvent e){
 	}
 }
 
+//reinitialise les champs en cas de mauvaise saisie
 void initialiser_champs(){
 	user_text[0]='\0';
 	pass_text[0]='\0';
@@ -406,7 +406,7 @@ void afficher_msg(char* msg){
 	change_focus_attibute(main_fen);
 }
 
-
+// retrouve l'id du message par son numera de fenetre
 int numero_msg(Window w){
 	int i;
 	for(i=0; i<nb_mails; i++)

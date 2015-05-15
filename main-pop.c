@@ -88,23 +88,19 @@ int main_cliquable(int argc, char* argv[]){
 	XEvent event;
 
 	//init_connexion
-
-	//printf("Trying %s...\n", argv[1]);
 	if(init_connexion(argv[1], atoi(argv[2]), NULL) == false){
 		printf("Error initilize connexion\n");
 		exit(EXIT_FAILURE);
 	}
-	//printf("Connected to %s\n", argv[1]);
 
-	while(quit_cliquable== false && quit_log == false) {	
+	while(quit_cliquable== false && quit_log == false) {	// fenetre pour se connecter
 		traiter_event(event);
 		if( quit_log == true){
 			sprintf(user_text, "%s\n", user_text);
 			sprintf(pass_text, "%s\n", pass_text);
-			//printf("USER %s\nPASS %s\n", user_text, pass_text);
 			if( !user_handler(user_text, NULL) || !pass_handler(pass_text, NULL)){
-				initialiser_champs();
-				afficher_msg("Identifiant non valide");
+				initialiser_champs();							// si l'identiiant non valide ou le mot de passe
+				afficher_msg("Identifiant non valide");			// on reinitialise les champs
 				quit_log= false;
 			}
 		}
@@ -113,13 +109,13 @@ int main_cliquable(int argc, char* argv[]){
 
 	detruire_log_win();
 
-	if(quit_log == true){
+	if(quit_log == true){					// si s'est connecté, si on a quitté la fenetre de log, si on n'a pas cliqué sur le bouton quitter general
 		int nb_msg= list_handler(NULL);
 
 		char ** top_tab= (char**) malloc(sizeof(char*) * nb_msg);
 		int i;
 		for(i= 1; i<=nb_msg; i++){
-			top_tab[i-1]= (char*) malloc(sizeof(char) * 1024);
+			top_tab[i-1]= (char*) malloc(sizeof(char) * 1024);		// on remplit les champs pour la partie graphique
 			top_handler(i, 0, top_tab[i-1]);
 			preparer_pour_affichage(i, top_tab[i-1]);
 		}
@@ -132,13 +128,12 @@ int main_cliquable(int argc, char* argv[]){
 		free(top_tab);
 
 		XEvent event_mails;
-		while(quit_cliquable == false){
+		while(quit_cliquable == false){			// tant que l'on a pas cliqué sur quitter
 			XNextEvent(dpy, &event_mails);
 			traiter_event_mails(event_mails);
 		}
 		detruire_pop_win();
 	}
-	//printf("QUIT\n");
 	detruire_main_win();
 
 	if(close_connexion() == false){
@@ -154,20 +149,16 @@ int main_graphique(int argc, char* argv[]){
 	XEvent event;
 
 	//init_connexion
-
-	//printf("Trying %s...\n", argv[1]);
 	if(init_connexion(argv[1], atoi(argv[2]), NULL) == false){
 		printf("Error initilize connexion\n");
 		exit(EXIT_FAILURE);
 	}
-	//printf("Connected to %s\n", argv[1]);
 
 	while(quit_cliquable== false && quit_log == false) {	
 		traiter_event(event);
 		if( quit_log == true){
 			sprintf(user_text, "%s\n", user_text);
 			sprintf(pass_text, "%s\n", pass_text);
-			//printf("USER %s\nPASS %s\n", user_text, pass_text);
 			if( !user_handler(user_text, NULL) || !pass_handler(pass_text, NULL)){
 				initialiser_champs();
 				afficher_msg("Identifiant non valide");
@@ -205,10 +196,8 @@ int main_graphique(int argc, char* argv[]){
 		}
 		detruire_pop_win();
 	}
-	//printf("QUIT\n");
 	detruire_main_win();
 	destroy_graphique();
-
 
 	if(close_connexion() == false){
 		printf("Error close connexion\n");
