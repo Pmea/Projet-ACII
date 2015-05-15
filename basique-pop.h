@@ -3,11 +3,11 @@
 
 #include <stdbool.h>
 
-bool init_connexion(char* serveur, int port);
+bool init_connexion(char* serveur, int port, char* sortie);
 bool close_connexion(void);
 
-bool user_handler(char* arg);
-bool pass_handler(char* arg);
+bool user_handler(char* arg, char* sortie);
+bool pass_handler(char* arg, char* sortie);
 
 int list_handler(char* sortie);
 

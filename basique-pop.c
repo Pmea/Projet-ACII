@@ -20,7 +20,10 @@
 
 FILE* fsock;
 
-bool init_connexion(const char* server, int port){
+bool init_connexion(const char* server, int port, char* sortie){
+	if(sortie != NULL){
+		sortie[0]='\0';
+	}
 	int sock;
 	struct sockaddr_in const *sin;
 	char ascii_buffer[LINELENGTH];
@@ -74,7 +77,9 @@ bool init_connexion(const char* server, int port){
 		perror("Error Server answer");
 	}
 
-	printf("%s",buff_ans);
+	if(sortie != NULL){
+		strcat(sortie, buff_ans);
+	}
 	return true;
 }
 
@@ -85,7 +90,10 @@ bool close_connexion(void){
 }
 
 
-bool user_handler(char* arg){
+bool user_handler(char* arg, char* sortie){
+	if(sortie != NULL)
+		sortie[0]='\0';
+
 	//envoier requet
 	if(fwrite("USER ", strlen("USER "), sizeof(char), fsock) == -1){
 		perror("Error write in socket");
@@ -106,7 +114,9 @@ bool user_handler(char* arg){
 		exit(EXIT_FAILURE);
 	}
 
-	printf("%s",buff_ans);
+	if(sortie != NULL){
+		strcat(sortie, buff_ans);
+	}
 
 	if(strncmp(buff_ans, "-ERR", 4) == 0)
 		return false;
@@ -115,7 +125,11 @@ bool user_handler(char* arg){
 
 
 
-bool pass_handler(char* arg){
+bool pass_handler(char* arg, char* sortie){
+	if(sortie != NULL){
+		sortie[0]='\0';
+	}
+
 	//envoier requet
 	if(fwrite("PASS ", strlen("PASS "), sizeof(char), fsock) == -1){
 		perror("Error write in socket");
@@ -134,7 +148,10 @@ bool pass_handler(char* arg){
 		exit(EXIT_FAILURE);
 	}
 
-	printf("%s",buff_ans);
+	if(sortie != NULL){
+		strcat(sortie, buff_ans);
+	}
+
 	if(strncmp(buff_ans, "-ERR", 4) == 0)
 		return false;
 	return true;

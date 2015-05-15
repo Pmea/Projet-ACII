@@ -1,32 +1,38 @@
 CC= gcc
 CFLAGS= -Wall -g -lm -lX11
 
+DIR= /tmp/3402198
+
 
 all: main-pop 
 
+
 #General
-main-pop.o: main-pop.c 
+
+dossier:
+	mkdir $(DIR)
+
+$(DIR)/main-pop.o: main-pop.c dossier
 	$(CC) -o $@ -c $< $(CFLAGS)		
 
-liste_mime.o: liste_mime.c liste_mime.h 
+$(DIR)/liste_mime.o: liste_mime.c liste_mime.h  dossier
 	$(CC) -o $@ -c $< $(CFLAGS)		
 
-basique-pop.o: basique-pop.c basique-pop.h
+$(DIR)/basique-pop.o: basique-pop.c basique-pop.h dossier
 	$(CC) -o $@ -c $< $(CFLAGS)	
 
-cliquable-pop.o: cliquable-pop.c cliquable-pop.h
+$(DIR)/cliquable-pop.o: cliquable-pop.c cliquable-pop.h dossier
 	$(CC) -o $@ -c $< $(CFLAGS)	
 
-graphique-pop.o: graphique-pop.c graphique-pop.h
+$(DIR)/graphique-pop.o: graphique-pop.c graphique-pop.h dossier
 	$(CC) -o $@ -c $< $(CFLAGS)	
 
-main-pop: main-pop.o basique-pop.o cliquable-pop.o graphique-pop.o liste_mime.o
-	$(CC) -o $@ $^ $(CFLAGS) 
+main-pop: $(DIR)/main-pop.o $(DIR)/basique-pop.o $(DIR)/cliquable-pop.o $(DIR)/graphique-pop.o $(DIR)/liste_mime.o
+	$(CC) -o $@ $^ $(CFLAGS)
 
 #Excercice 1
 t-test: main-pop 
 	./main-pop 127.0.0.1 110 -t
-
 
 #Excercice 2
 c-test: main-pop
@@ -38,4 +44,4 @@ g-test: main-pop
 
 
 clean:
-	rm main-pop *.o 
+	rm -fr main-pop *.o $(DIR)

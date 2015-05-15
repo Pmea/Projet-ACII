@@ -90,7 +90,7 @@ int main_cliquable(int argc, char* argv[]){
 	//init_connexion
 
 	//printf("Trying %s...\n", argv[1]);
-	if(init_connexion(argv[1], atoi(argv[2])) == false){
+	if(init_connexion(argv[1], atoi(argv[2]), NULL) == false){
 		printf("Error initilize connexion\n");
 		exit(EXIT_FAILURE);
 	}
@@ -101,8 +101,8 @@ int main_cliquable(int argc, char* argv[]){
 		if( quit_log == true){
 			sprintf(user_text, "%s\n", user_text);
 			sprintf(pass_text, "%s\n", pass_text);
-			printf("USER %s\nPASS %s\n", user_text, pass_text);
-			if( !user_handler(user_text) || !pass_handler(pass_text)){
+			//printf("USER %s\nPASS %s\n", user_text, pass_text);
+			if( !user_handler(user_text, NULL) || !pass_handler(pass_text, NULL)){
 				initialiser_champs();
 				afficher_msg("Identifiant non valide");
 				quit_log= false;
@@ -155,8 +155,8 @@ int main_graphique(int argc, char* argv[]){
 
 	//init_connexion
 
-	printf("Trying %s...\n", argv[1]);
-	if(init_connexion(argv[1], atoi(argv[2])) == false){
+	//printf("Trying %s...\n", argv[1]);
+	if(init_connexion(argv[1], atoi(argv[2]), NULL) == false){
 		printf("Error initilize connexion\n");
 		exit(EXIT_FAILURE);
 	}
@@ -167,8 +167,8 @@ int main_graphique(int argc, char* argv[]){
 		if( quit_log == true){
 			sprintf(user_text, "%s\n", user_text);
 			sprintf(pass_text, "%s\n", pass_text);
-			printf("USER %s\nPASS %s\n", user_text, pass_text);
-			if( !user_handler(user_text) || !pass_handler(pass_text)){
+			//printf("USER %s\nPASS %s\n", user_text, pass_text);
+			if( !user_handler(user_text, NULL) || !pass_handler(pass_text, NULL)){
 				initialiser_champs();
 				afficher_msg("Identifiant non valide");
 				quit_log= false;
@@ -218,20 +218,20 @@ int main_graphique(int argc, char* argv[]){
 }
 
 int main_textuel(int argc, char* argv[]){
+	char* reponse=malloc(sizeof(char) * 4096);
 
 	printf("Trying %s...\n", argv[1]);
-	if(init_connexion(argv[1], atoi(argv[2])) == false){
+	if(init_connexion(argv[1], atoi(argv[2]), reponse) == false){
 		printf("Error initilize connexion\n");
 		exit(EXIT_FAILURE);
 	}
+	printf("%s\n", reponse);
 
 	printf("Connected to %s\n", argv[1]);
 
 	char cmd [128];
 	bool finish= false;
 	int indice;
-
-	char* reponse=malloc(sizeof(char) * 4096);
 
 	while(finish != true){
 		if(fgets(cmd, 128, stdin) == NULL){
@@ -247,7 +247,8 @@ int main_textuel(int argc, char* argv[]){
 						printf("Invalide argument, please enter a new command\n");
 					}
 					else{	
-						user_handler(cmd+indice);
+						user_handler(cmd+indice, reponse);
+						printf("%s\n",reponse);
 					}
 				}
 				break;
@@ -259,7 +260,8 @@ int main_textuel(int argc, char* argv[]){
 					}
 					else{	
 						//traiter commande
-						pass_handler(cmd+indice);
+						pass_handler(cmd+indice, reponse);
+						printf("%s\n", reponse);
 					}
 				}
 				break;
