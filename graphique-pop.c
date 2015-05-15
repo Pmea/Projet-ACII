@@ -63,14 +63,13 @@ void init_graphique(void){
 	XAllocNamedColor(dpy, DefaultColormap(dpy, DefaultScreen(dpy)), "DimGrey", &color_focus, &color_focus);
 	XAllocNamedColor(dpy, DefaultColormap(dpy, DefaultScreen(dpy)), "WhiteSmoke", &color_fond_de_fen , &color_fond_de_fen );
 
-	if ((font=XLoadQueryFont(dpy,"fixed"))==NULL){
+	if ((font=XLoadQueryFont(dpy,"-misc-fixed-medium-r-semicondensed--13-120-75-75-c-60-iso8859-1"))==NULL){
 	 	fprintf(stderr," Sorry, having font problems.\n");
 	    exit(-1);
 	}
 }
 
 void init_mail_win_graphique(int num_msg){
-
 	tab_mails[num_msg].mail_fen = XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0,
 			    WIDTH_MAIL_WIN,
 				HEIGHT_MAIL_WIN,
@@ -89,7 +88,7 @@ void init_mail_win_graphique(int num_msg){
 	char * contenu_mail= (char*) malloc(sizeof(char) * 4096);
 	retr_handler(num_msg, contenu_mail);
 	if(strcmp(contenu_mail, "") == 0){
-		XDrawString(dpy, main_fen, DefaultGC(dpy,DefaultScreen(dpy)), 10, 20, "Mail multi part non conforme", strlen("Mail multi part non conforme") );
+		//XDrawString(dpy, main_fen, DefaultGC(dpy,DefaultScreen(dpy)), 10, 20, "Mail multi part non conforme", strlen("Mail multi part non conforme") );
 		besoin_msg_erreur=true;
 		return;
 	}
@@ -235,7 +234,8 @@ void destroy_mail_win_graphique(int num_msg){
 }
 
 void destroy_graphique(void){
-	XFreeFont(dpy, font);
+	if(font != NULL)
+		XFreeFont(dpy, font);
 	int i;
 	for(i=0; i< N; i++)
 		if(tab_mails[i].init_window == true)

@@ -73,12 +73,13 @@ bool init_main_win(){
 					       BlackPixel(dpy,DefaultScreen(dpy)),
 					       color_fond.pixel);
 
-	if ((font_general=XLoadQueryFont(dpy,"fixed"))==NULL){
+	if ((font_general=XLoadQueryFont(dpy,"-misc-fixed-medium-r-semicondensed--13-120-75-75-c-60-iso8859-1"))==NULL){
 	 	fprintf(stderr," Sorry, having font problems.\n");
 	    exit(-1);
 	}
 
 	gc_glob_general=XCreateGC(dpy,main_fen,0,NULL);
+
  	XSetFont(dpy,gc_glob_general,font_general->fid);
  	XSetForeground(dpy,gc_glob_general,BlackPixel(dpy,DefaultScreen(dpy)));
  	XSetBackground(dpy,gc_glob_general,WhitePixel(dpy,DefaultScreen(dpy))); 
