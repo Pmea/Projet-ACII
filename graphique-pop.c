@@ -66,6 +66,7 @@ bool est_present(int id){
 	return false;
 }
 
+// chargement des parametre commun a toutes les fenetres
 void init_graphique(void){
 	XAllocNamedColor(dpy, DefaultColormap(dpy, DefaultScreen(dpy)), "grey", &color_fond, &color_fond);
 	XAllocNamedColor(dpy, DefaultColormap(dpy, DefaultScreen(dpy)), "DimGrey", &color_focus, &color_focus);
@@ -78,6 +79,7 @@ void init_graphique(void){
 	cursor= XCreateFontCursor(dpy, CODE_CURS_XC_draft_large);
 }
 
+// initialisation d'une fenetre mail, avec du message
 void init_mail_win_graphique(int num_msg){
 	tab_mails[num_msg].mail_fen = XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0,
 			    WIDTH_MAIL_WIN,
@@ -97,14 +99,14 @@ void init_mail_win_graphique(int num_msg){
 	char * contenu_mail= (char*) malloc(sizeof(char) * 4096);
 	retr_handler(num_msg, contenu_mail);
 	if(strcmp(contenu_mail, "") == 0){
-		XDrawString(dpy, main_fen, DefaultGC(dpy,DefaultScreen(dpy)), 10, 20, "Mail multi part non conforme", strlen("Mail multi part non conforme") );
+		XDrawString(dpy, main_fen, DefaultGC(dpy,DefaultScreen(dpy)), 10, 20, "Mail multipart non conforme", strlen("Mail multipart non conforme") );
 		besoin_msg_erreur=true;
 		return;
 	}
 
 	int font_direction, font_ascent, font_descent;
 	XCharStruct text_structure;
-	char string_etal[]= "lj";
+	char string_etal[]= "lj";								// pour avoir la taille max d'une ligne 
 	XTextExtents(font, string_etal, strlen(string_etal),
 	             &font_direction, &font_ascent, &font_descent,
 	             &text_structure);
@@ -121,7 +123,7 @@ void init_mail_win_graphique(int num_msg){
 	char* line;
 	int cmpt_total=0;
 
-	for(line= strtok(contenu_mail, "\n") ; line != NULL; line= strtok(NULL, "\n")){
+	for(line= strtok(contenu_mail, "\n") ; line != NULL; line= strtok(NULL, "\n")){		// on lit le texte ligne par ligne 
 		nb_ligne++;
 		width_tmp=0;
 
@@ -145,7 +147,6 @@ void init_mail_win_graphique(int num_msg){
 						width_tmp+= text_structure.width;
 					}	
 			
-					
 					strncat(tab_mails[num_msg].contenu_mail_traiter, debutmot+debut, cmpt-debut+1);
 
 					debut+=(cmpt-debut+1);
@@ -243,6 +244,7 @@ void destroy_mail_win_graphique(int num_msg){
 
 }
 
+// detruire les variables globales et  les fenetres graphiques encore ouverte
 void destroy_graphique(void){
 	if(font != NULL)
 		XFreeFont(dpy, font);
@@ -266,7 +268,6 @@ void traiter_ButtonRelease_sur_mail_graphique(XButtonEvent  xbe){
 }
 
 
-// voir si il n'y a pas d'amelioration 
 void expose_graphique(Window win){
 	if(besoin_msg_erreur==true){
 		XClearWindow(dpy, main_fen);
@@ -282,7 +283,7 @@ void expose_graphique(Window win){
 				int line=0;
 				int j;
 
-				while(tab_mails[k].contenu_mail_traiter[i] != '\0'){
+				while(tab_mails[k].contenu_mail_traiter[i] != '\0'){			// on relit le texte et on affiche ligne par ligne
 					j=0;
 					line++;
 					while(tab_mails[k].contenu_mail_traiter[i+j] != '\n'){
@@ -299,7 +300,7 @@ void expose_graphique(Window win){
 }
 
 
-void traiter_ButtonPress_sur_mail_graphique(XButtonEvent  xbe){	// besoin de regarder la fenetre !! main ou l'autre 
+void traiter_ButtonPress_sur_mail_graphique(XButtonEvent  xbe){ 
 	if(xbe.window == quit_general){
 		quit_cliquable=true;
 		return;
@@ -341,7 +342,6 @@ void traiter_ButtonPress_sur_mail_graphique(XButtonEvent  xbe){	// besoin de reg
 		}
 	}
 
-	// corriger bug 
 	int tmp= numero_msg(xbe.window);
 	if( tmp == -1){
 		printf("Erreur lors de la recherche du numero de message\n");
