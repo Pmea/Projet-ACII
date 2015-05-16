@@ -51,7 +51,7 @@ void preparer_pour_affichage(int nb_du_msg, char* top){
 		buff_form=strndup(top + (int) m[1].rm_so, m[1].rm_eo - m[1].rm_so );
 	}
 	else{
-		sprintf(buff_form, "xxxxxxxxxxx@xxxxxx.xxx");
+		sprintf(buff_form, "xxxxxxxxxxx@xxxxxx.xxx");			// si le champs et manquant, on le remplace par un autre champs par defaut
 	}
 
 	match= regexec(&r_date, top, n_matches, m, 0);
@@ -148,12 +148,13 @@ int main_graphique(int argc, char* argv[]){
 	init_log_win();
 	XEvent event;
 
-	//init_connexion
+	//connexion au serveur
 	if(init_connexion(argv[1], atoi(argv[2]), NULL) == false){
 		printf("Error initilize connexion\n");
 		exit(EXIT_FAILURE);
 	}
 
+	// la fenetre de connexion 
 	while(quit_cliquable== false && quit_log == false) {	
 		traiter_event(event);
 		if( quit_log == true){
@@ -170,6 +171,7 @@ int main_graphique(int argc, char* argv[]){
 
 	detruire_log_win();
 	
+	// preparer la liste des mails
 	if(quit_log == true){
 		int nb_msg= list_handler(NULL);
 
@@ -177,7 +179,7 @@ int main_graphique(int argc, char* argv[]){
 		int i;
 		for(i= 1; i<=nb_msg; i++){
 			top_tab[i-1]= (char*) malloc(sizeof(char) * 1024);
-			top_handler(i, 0, top_tab[i-1]);
+			top_handler(i, 0, top_tab[i-1]);					// recuperation des entetes des mails
 			preparer_pour_affichage(i, top_tab[i-1]);
 		}
 
@@ -190,7 +192,8 @@ int main_graphique(int argc, char* argv[]){
 
 		init_graphique();
 		XEvent event_mails;
-		while(quit_cliquable == false){
+
+		while(quit_cliquable == false){					// boucle principal du programme
 			XNextEvent(dpy, &event_mails);
 			traiter_event_mails_graphique(event_mails);
 		}
@@ -210,6 +213,7 @@ int main_textuel(int argc, char* argv[]){
 	char* reponse=malloc(sizeof(char) * 4096);
 
 	printf("Trying %s...\n", argv[1]);
+	// initialisation de la connexion
 	if(init_connexion(argv[1], atoi(argv[2]), reponse) == false){
 		printf("Error initilize connexion\n");
 		exit(EXIT_FAILURE);
@@ -221,6 +225,7 @@ int main_textuel(int argc, char* argv[]){
 	bool finish= false;
 	int indice;
 
+	// boucle principale de l'application
 	while(finish != true){
 		if(fgets(cmd, 128, stdin) == NULL){
 			printf("Error read on stdin is unavailable");
@@ -314,6 +319,7 @@ int main (int argc, char* argv[]){
 		return EXIT_FAILURE;
 	}
 
+	//fabrication de la liste mime pour faire la correspondance type et extension
 	if(construire_liste_mime() == false){
 		printf("Error creation of mime_type liste\n");
 		exit(EXIT_FAILURE);

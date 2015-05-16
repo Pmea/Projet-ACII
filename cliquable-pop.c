@@ -215,6 +215,7 @@ void traiter_ExposeEvent(XExposeEvent xee){
 	}
 }
 
+// change la couleur de fond de la fenetre qui a le focus
 void change_focus_attibute(Window focus_fen){
 	XSetWindowBackground(dpy, log_user_fen, color_fond.pixel);
 	XSetWindowBackground(dpy, log_pass_fen, color_fond.pixel);
@@ -272,16 +273,15 @@ void traiter_KeyPressEvent(XKeyEvent xke){
 			if(focus_fen == log_user_fen){
 				if(strlen(user_text) > 0){
 					user_text[strlen(user_text) -1]= '\0';
-					XDrawString(dpy, log_user_fen, gc_glob_general, MARGIN/2, MARGIN*3/2, user_text, strlen(user_text));
 				}
 			}
 		
 			if(focus_fen == log_pass_fen){
 				if(strlen(pass_text) > 0){
 					pass_text[strlen(pass_text) -1]= '\0';
-					XDrawString(dpy, log_pass_fen, gc_glob_general, MARGIN/2, MARGIN*3/2, pass_text, strlen(pass_text));
 				}
 			}
+		expose();
 		return;
 	}
 
@@ -296,6 +296,7 @@ void traiter_KeyPressEvent(XKeyEvent xke){
 				change_focus_attibute(focus_fen);		
 			}
 		}
+		expose();
 		return;
 	}
 
@@ -303,15 +304,14 @@ void traiter_KeyPressEvent(XKeyEvent xke){
 		if(focus_fen == log_user_fen){
 			if( strlen(user_text) < MAX_LENGTH){
 				sprintf(user_text, "%s%s", user_text, key);
-				XDrawString(dpy, log_user_fen, gc_glob_general, MARGIN/2, MARGIN*3/2, user_text, strlen(user_text));
 			}
 		}
 		if(focus_fen == log_pass_fen){
 			if( strlen(pass_text) < MAX_LENGTH){
 				sprintf(pass_text, "%s%s", pass_text, key);
-				XDrawString(dpy, log_pass_fen, gc_glob_general, MARGIN/2, MARGIN*3/2, pass_text, strlen(pass_text));		
 			}
 		}
+		expose();
 		return;
 	}
 }

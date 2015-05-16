@@ -256,17 +256,6 @@ void destroy_graphique(void){
 }
 
 
-void traiter_ButtonRelease_sur_mail_graphique(XButtonEvent  xbe){
-	int i;
-	for(i=0; i<N; i++){
-		if(tab_mails[i].init_window == true){	
-			if(xbe.window == tab_mails[i].slider){
-				return;
-			}
-		}
-	}
-}
-
 
 void expose_graphique(Window win){
 	if(besoin_msg_erreur==true){
@@ -372,13 +361,5 @@ void traiter_event_mails_graphique(XEvent e){
 		return;
 	}
 
-	if(e.type == ButtonRelease){
-		traiter_ButtonRelease_sur_mail_graphique(e.xbutton);
-		return;
-	}
-
-	if(e.type == MotionNotify){
-		return;
-	}
 }
 
