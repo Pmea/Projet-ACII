@@ -52,57 +52,57 @@
 
 \section{Extraction des Types Mimes}
 \paragraph{}
-Pour recuperer la correspondence entre type mime et extension de fichier.\\
-Au démarrage le programme, ouvrir le fichier \texttt{/etc/mime.tpyes} et parse son contenu et creer une liste donc chaque cellule est de la forme: type, extension.\\
+Pour récupérer la correspondance entre type mime et extension de fichier.\\
+Au démarrage le programme, ouvrir le fichier \texttt{/etc/mime.types} et analyser son contenu et créer une liste donc chaque cellule est de la forme: type, extension.\\
 Si plusieurs extensions sont possible pour le même type, on prend arbitrairement le premier.\\
-Quand on va recuperer un mail, le programme va chercher dans la liste l'extension correspondant.
+Quand on va récupérer un mail, le programme va chercher dans la liste l'extension correspondant.
 
 \section{Client en mode textuel}
 \paragraph{}
 Pour le client textuel, le fonctionnement est simple, le programme se connecte au serveur puis le programme lit les entrées au clavier.
-Tant que le message n'est pas \texttt{QUIT}, il va continuer à boucler.\\
-Pour connaître la commande qu'a envoyé l'utilisateur, le programme commence par comparer la première lettre puis si elle correspond à une des possibles, donc U,P,L,T,R ou Q.\\
-Cela est fait uniquement pour ne pas avoir besoin de faire plusieurs \texttt{strcmp} qui sont plus coûteux.
+Tant que le message tapé n'est pas \texttt{QUIT}, il va continuer à boucler.\\
+Pour connaître la commande qu'à entrée l'utilisateur, le programme commence par comparer la première lettre puis si elle correspond à une des possibles, donc U,P,L,T,R ou Q.\\
+Cela est mise en place pour ne pas avoir besoin de faire plusieurs \texttt{strcmp} qui sont plus coûteux.
 
 \paragraph{}
-Toutes les fonctionnes retourne les réponses du serveur dans le chaîne sortie, il faut donc faire veiller que le chaîne passé au paramètre soit d'une taille suffisante (dans le programme elle est fixé à 4096).\\
-Le main récupère cette chaîne peut l'utiliser pour l'afficher dans la partie textuel ou l'envoyer la à partie graphique pour les autres parties.\\
-Comme le nom du fichier l'indique les fonctions sont asses basiques et se contantent de faire une requete au serveur et de traiter la reponse (en garnisant la chaine sortie).\\
-Le fonctionnement de la fonction \texttt{retr\_handler} est un peu particuliere. Le programme regarde si le mail est un mail avec des multi-parts. Si c'est un multipart, le programme va chercher le \texttt{Boundary} puis va parcourir le mail et va creer un fichier pour chaque partie du mail.\\
+Toutes les fonctionnes retourne les réponses du serveur dans le chaîne \texttt{sortie}, il faut donc faire veiller que le chaîne passé au paramètre soit d'une taille suffisante.\\
+Le main récupère cette chaîne peut l'utiliser pour l'afficher dans la partie textuel ou l'envoyer à la partie graphique pour les autres parties.\\
+Comme le nom du fichier l'indique les fonctions sont asses basiques et se contentant de faire une requête au serveur et de traiter la réponse (en garnissant la chaîne sortie).\\
+Le fonctionnement de la fonction \texttt{retr\_handler} est un peu particulière. Le programme regarde si le mail est un mail avec des multi-parts. Si c'est un multi-part, le programme va chercher le \texttt{Boundary} puis va parcourir le mail et va créer un fichier pour chaque partie du mail.\\
 Sinon il écrit simplement le contenu du fichier dans un fichier \texttt{\.txt}.
 
 \section{Client en mode cliquable}
 \paragraph{}
-Le programme va creer un fenetre avec a l'interieur des sous fenetres pour permertre a l'utilisateur de pouvoir d'entrer ses identifiants et mot de passe.\\
+Le programme va créer une fenêtre avec à l’intérieur des sous fenêtres pour permettre à l'utilisateur de pouvoir d'entrer ses identifiants et sont mot de passe.\\
 Il va ensuite se connecter avec le serveur. Puis le programme va boucle tant que l'utilisateur n'aura pas cliquer sur le bouton \texttt{Connexion} ou \texttt{Quit}.\\
-Une fois connecté, le serveur a faire un requete \texttt{TOP} sur les dix premiers messages du serveur et va traiter les entêtes pour extraire : l’expéditeur, le sujet et le date. Avec ses information, il va initialiser un fenetre listant les dix premiers messages. L'utilisateur n'aura qu'a cliquer sur le messages si il veut récupérer le message.\\
-Pour ne pas récupérer plusieurs fois le même message, un tableau listant les messages dejas recuperé a ete intergrer au programme.
+Une fois connecté, le serveur a faire un requête \texttt{TOP} sur les dix premiers messages du serveur et va traiter les entêtes pour extraire : l’expéditeur, le sujet et le date. Avec es informations, il va initialiser un fenêtre listant les dix premiers messages. L'utilisateur n'aura qu'à cliquer sur le message si il veut le récupérer.\\
+Pour ne pas récupérer plusieurs fois le même message, un tableau listant les messages déjà récupéré a été intégré au programme.
 
 \paragraph{}
-Si des informations venaient a manquer dans l'entete le programme les remplaceraient par des chaines predefini. 
+Si des informations venaient à manquer dans l’entête le programme les remplaceraient par des chaînes prédéfinies. 
 
 \paragraph{}
-Pour savoir a qui sont destionné les evenements de \texttt{KeyPress} et faire le changement de couleur de fond pour la fenetre active. Le programme garde un pointeur sur la fenetre qui a le focus.
+Pour savoir à qui sont destiné les événements de \texttt{KeyPress} et faire le changement de couleur de fond pour la fenêtre active. Le programme garde un pointeur sur la fenêtre qui à le focus.
 
 \paragraph{}
-On peut noter qu'il y a deux fonctions traitant les \texttt{XEvent} : la premiere \texttt{traiter\_event} sert a traiter les messages pour fenetre de connexion alors que la seconde \texttt{traiter\_event\_mails} sert a traiter les messages sur la fenetre des mails.
+On peut noter qu'il y à deux fonctions traitant les \texttt{XEvent} : la première \texttt{traiter\_event} sert à traiter les messages pour la fenêtre de connexion alors que la seconde \texttt{traiter\_event\_mails} sert a traiter les messages sur la fenêtre des mails.
 
 \section{Client en mode graphique}
 \paragraph{}
-Pour cette partie, le main est tres similaire au la partie du main consacré a la partie cliquable.\\
-Le programme utise par contre une nouvelle fonctions pour traiter les evenements. Quand l'utilisateur lcique sur un mail, le programme va ouvrir une nouvelle fenetre et va afficher le mail.\\
-Les fenetres ouvertes sont stocké dans un tableau pouvant contenir les dix mail. Il permet de  sauvegarder toutes leurs informations, contenu du mail, taille, des mails ouverts.
+Pour cette partie, le main est très similaire au la partie du main consacré à la partie cliquable.\\
+Le programme utilise par contre une nouvelle fonctions pour traiter les événements. Quand l'utilisateur clique sur un mail, le programme va ouvrir une nouvelle fenêtre et va afficher le mail.\\
+Les fenêtres ouvertes sont stockées dans un tableau pouvant contenir les dix mails. Il permet de sauvegarder toutes leurs informations, contenu du mail, taille, des mails ouverts.
 
 \paragraph{}
 Quand l'utilisateur va cliquer sur un mail, cela va ouvrir une nouvelle fenêtre contenant une sous fenêtre. plus grande contenant le contenu du mail.
 
 \paragraph{}
-Quand l'utilisateur va cliquer sur la barre de defilement, a ce moment le logiciel va se metre a capter les mouvenant de la sourie tant que l'utilisateur ne relachera pas le bouton de la sourie. Cela va faire bouger la fenetre inferieur et donc afficher le reste du message. \\
+Quand l'utilisateur va cliquer sur la barre de défilement, à ce moment le logiciel va se mètre a capter les mouvements de la sourie tant que l'utilisateur ne relâchera pas le bouton de la sourie. Cela va faire bouger la fenêtre inférieur et donc afficher le reste du message. \\
 
-\section{Amelioration et Limitation}
+\section{Amélioration et Limitation}
 \paragraph{}
-Dans la partie graphique, les accents ne sont pas prit en charge. Il aurai donc était intéressant de permettre à l'utilisateur de pouvoir lire des messages avec différentes polices (ou différentes alphabètes). 
+Dans la partie graphique, les accents ne sont pas prit en charge. Il aurai été intéressant de permettre à l'utilisateur de pouvoir lire des messages avec différentes polices (ou différentes alphabètes). 
 \paragraph{}
-Lors de la recuperation des mails multipart, le programme utilise les \texttt{boundary} pour delimité les messages, donc la premiere partie du mail compris entre les entetes generales et le prmeiers \texttt{boundary} est ignoré. 
+Lors de la récupération des mails multi-part, le programme utilise les \texttt{boundary} pour délimiter les messages, donc la première partie du mail compris entre les entêtes générales et le premiers \texttt{boundary} est ignoré. 
 
 \end{document}
