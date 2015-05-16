@@ -323,7 +323,7 @@ void traiter_ButtonPress_sur_mail_graphique(XButtonEvent  xbe){
 						tab_mails[i].posslider+= diff;
 					}
 					if(tab_mails[i].posslider+diff <= 0 && tab_mails[i].posslider+diff >= -1*(HEIGHT_MAIL_CONTENU- HEIGHT_SLIDER))
-					XMoveWindow(dpy, tab_mails[i].mail_contenu_inter,0, ((tab_mails[i].posslider + diff)*tab_mails[i].height_contenu_inter) / HEIGHT_MAIL_CONTENU );
+					XMoveWindow(dpy, tab_mails[i].mail_contenu_inter,0, ((tab_mails[i].posslider + diff)*tab_mails[i].height_contenu_inter) / (HEIGHT_MAIL_CONTENU - HEIGHT_SLIDER) );
 				}
 				XNextEvent(dpy, &tmp);
 			}

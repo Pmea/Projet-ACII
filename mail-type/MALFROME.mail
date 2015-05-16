@@ -1,0 +1,26 @@
+Content-type: multipart/mixed; boundary="'''frontier'''"
+MIME-version: 1.0
+Date: Sat, 19 Jul 2008 08:02:34 +0200 (CEST)
+From: malforme@multipart.org
+To: pmea@example.org
+Subject: news
+
+--'''frontier'''
+Content-type: application/octet-stream
+Content-transfer-encoding: base64
+
+PGh0bWw+CiAgPGhlYWQ+CiAgPC9oZWFkPgogIDxib2R5PgogICAgPHA+VGhpcyBpcyB0aGUg
+Ym9keSBvZiB0aGUgbWVzc2FnZS48L3A+CiAgPC9ib2R5Pgo8L2h0bWw+Cg==
+
+
+This is a multi-part message in MIME format.
+--'''frontier'''
+Content-type: text/plain
+
+Bonjour,
+Je suis un mail avec des multipart
+Au revoir
+
+--'''frontier'''--
+.
+
